@@ -2,24 +2,21 @@
 import { computed, useAttrs } from "vue";
 
 defineOptions({ inheritAttrs: false });
-const props = defineProps({
-    variant: {
-      type: String,
-      default: "secondary",
-      validator: (value) =>
-        ["primary", "secondary", "ghost", "danger", "plain"].includes(value),
-    },
-    busy: Boolean,
-    label: String,
-    pendingLabel: String,
-    type: { type: String, default: "button" },
-  }),
-  attrs = useAttrs(),
-  buttonAttrs = computed(() =>
-    Object.fromEntries(
-      Object.entries(attrs).filter(([key]) => key !== "class"),
-    ),
-  );
+defineProps({
+  variant: {
+    type: String,
+    default: "secondary",
+    validator: (value) => ["primary", "secondary", "ghost", "danger", "plain"].includes(value),
+  },
+  busy: Boolean,
+  label: String,
+  pendingLabel: String,
+  type: { type: String, default: "button" },
+});
+const attrs = useAttrs();
+const buttonAttrs = computed(() =>
+  Object.fromEntries(Object.entries(attrs).filter(([key]) => key !== "class")),
+);
 </script>
 
 <template>

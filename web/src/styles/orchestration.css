@@ -9,8 +9,7 @@
 .orchestration-editor .identity-panel {
   padding-bottom: 6px;
 }
-.orchestration-editor
-  :is(.orchestration-mode, .orchestration-stage, .session-dock) {
+.orchestration-editor :is(.orchestration-mode, .orchestration-stage, .session-dock) {
   padding: 20px;
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);

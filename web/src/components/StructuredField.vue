@@ -41,33 +41,19 @@ const rootSchema = computed(() => props.rootSchema || props.schema || {});
 const definition = computed(() =>
   effectiveSchema(props.schema, props.modelValue, rootSchema.value),
 );
-const kind = computed(() =>
-  schemaType(definition.value, props.modelValue, rootSchema.value),
-);
-const variants = computed(() =>
-  variantsFor(definition.value, rootSchema.value),
-);
-const finiteChoices = computed(() =>
-  finiteChoicesFor(definition.value, rootSchema.value),
-);
-const title = computed(
-  () => props.label || definition.value.title || props.path.split(".").at(-1),
-);
-const help = computed(
-  () => props.description || definition.value.description || "",
-);
+const kind = computed(() => schemaType(definition.value, props.modelValue, rootSchema.value));
+const variants = computed(() => variantsFor(definition.value, rootSchema.value));
+const finiteChoices = computed(() => finiteChoicesFor(definition.value, rootSchema.value));
+const title = computed(() => props.label || definition.value.title || props.path.split(".").at(-1));
+const help = computed(() => props.description || definition.value.description || "");
 const requiredKeys = computed(() => new Set(definition.value.required || []));
 const properties = computed(() => definition.value.properties || {});
 const objectValue = computed(() =>
-  props.modelValue &&
-  typeof props.modelValue === "object" &&
-  !Array.isArray(props.modelValue)
+  props.modelValue && typeof props.modelValue === "object" && !Array.isArray(props.modelValue)
     ? props.modelValue
     : {},
 );
-const arrayValue = computed(() =>
-  Array.isArray(props.modelValue) ? props.modelValue : [],
-);
+const arrayValue = computed(() => (Array.isArray(props.modelValue) ? props.modelValue : []));
 const additionalSchema = computed(() => {
   const additional = definition.value.additionalProperties;
   return additional && typeof additional === "object" ? additional : {};
@@ -79,9 +65,7 @@ const allowsAdditional = computed(
       typeof definition.value.additionalProperties === "object"),
 );
 const dynamicEntries = computed(() =>
-  Object.entries(objectValue.value).filter(
-    ([key]) => !Object.hasOwn(properties.value, key),
-  ),
+  Object.entries(objectValue.value).filter(([key]) => !Object.hasOwn(properties.value, key)),
 );
 const options = computed(() => {
   const source = definition.value["x-meldfabric-option-source"];
@@ -113,9 +97,7 @@ function updateObject(key, value) {
 function objectFieldValue(key, field) {
   if (Object.hasOwn(objectValue.value, key)) return objectValue.value[key];
   const fieldSchema = resolveSchema(field, rootSchema.value);
-  return Object.hasOwn(fieldSchema, "default")
-    ? cloneValue(fieldSchema.default)
-    : undefined;
+  return Object.hasOwn(fieldSchema, "default") ? cloneValue(fieldSchema.default) : undefined;
 }
 
 function unsetObject(key) {
@@ -151,17 +133,13 @@ function activeVariant() {
   const current = kind.value;
   return (
     variants.value.find(
-      (item) =>
-        schemaType(item.schema, props.modelValue, rootSchema.value) === current,
+      (item) => schemaType(item.schema, props.modelValue, rootSchema.value) === current,
     )?.index ?? variants.value[0]?.index
   );
 }
 
 function addArray() {
-  const itemSchema = resolveSchema(
-    definition.value.items || {},
-    rootSchema.value,
-  );
+  const itemSchema = resolveSchema(definition.value.items || {}, rootSchema.value);
   const value = defaultValue(itemSchema, rootSchema.value);
   Object.assign(modal, {
     mode: "array-add",
@@ -177,11 +155,7 @@ function editArray(index) {
     mode: "array-edit",
     index,
     key: "",
-    type: schemaType(
-      definition.value.items || {},
-      arrayValue.value[index],
-      rootSchema.value,
-    ),
+    type: schemaType(definition.value.items || {}, arrayValue.value[index], rootSchema.value),
     value: cloneValue(arrayValue.value[index]),
   });
 }
@@ -191,9 +165,7 @@ function addEntry() {
     mode: "object-add",
     index: -1,
     key: "",
-    type:
-      schemaType(additionalSchema.value, undefined, rootSchema.value) ||
-      "string",
+    type: schemaType(additionalSchema.value, undefined, rootSchema.value) || "string",
     value: defaultValue(additionalSchema.value, rootSchema.value),
   });
   if (!Object.keys(additionalSchema.value).length) {
@@ -223,9 +195,9 @@ function closeModal() {
 }
 
 function commitModal() {
-  const invalid = [
-    ...(modalForm.value?.querySelectorAll("input, textarea") || []),
-  ].find((control) => !control.checkValidity());
+  const invalid = [...(modalForm.value?.querySelectorAll("input, textarea") || [])].find(
+    (control) => !control.checkValidity(),
+  );
   if (invalid) {
     invalid.reportValidity();
     return;
@@ -264,18 +236,12 @@ function inputString(event) {
     class="structured-choice structured-field-block"
     :class="[layout, { root }]"
   >
-    <header
-      v-if="!root || layout === 'dialog'"
-      class="structured-field-heading"
-    >
+    <header v-if="!root || layout === 'dialog'" class="structured-field-heading">
       <div>
         <strong>{{ title }}</strong>
         <small v-if="help">{{ help }}</small>
       </div>
-      <UiButton
-        v-if="canUnset && layout !== 'dialog'"
-        variant="ghost"
-        @click="$emit('unset')"
+      <UiButton v-if="canUnset && layout !== 'dialog'" variant="ghost" @click="$emit('unset')"
         >重置</UiButton
       >
       <span v-else-if="required">必填</span>
@@ -293,10 +259,7 @@ function inputString(event) {
     class="structured-union structured-field-block"
     :class="[layout, { root }]"
   >
-    <header
-      v-if="!root || layout === 'dialog'"
-      class="structured-field-heading"
-    >
+    <header v-if="!root || layout === 'dialog'" class="structured-field-heading">
       <div>
         <strong>{{ title }}</strong>
         <small v-if="help">{{ help }}</small>
@@ -305,16 +268,12 @@ function inputString(event) {
     </header>
     <SelectControl
       :model-value="activeVariant()"
-      :options="
-        variants.map((item) => ({ value: item.index, label: item.label }))
-      "
+      :options="variants.map((item) => ({ value: item.index, label: item.label }))"
       @update:model-value="selectVariant"
     />
     <StructuredField
       :model-value="modelValue"
-      :schema="
-        variants.find((item) => item.index === activeVariant())?.schema || {}
-      "
+      :schema="variants.find((item) => item.index === activeVariant())?.schema || {}"
       :root-schema="rootSchema"
       :option-sources="optionSources"
       :path="path"
@@ -324,20 +283,13 @@ function inputString(event) {
     />
   </div>
 
-  <section
-    v-else-if="kind === 'object'"
-    class="structured-object"
-    :class="[layout, { root }]"
-  >
+  <section v-else-if="kind === 'object'" class="structured-object" :class="[layout, { root }]">
     <header v-if="!root" class="structured-group-heading">
       <div>
         <strong>{{ title }}</strong>
         <small v-if="help">{{ help }}</small>
       </div>
-      <UiButton
-        v-if="canUnset && layout !== 'dialog'"
-        variant="ghost"
-        @click="$emit('unset')"
+      <UiButton v-if="canUnset && layout !== 'dialog'" variant="ghost" @click="$emit('unset')"
         >重置</UiButton
       >
     </header>
@@ -360,32 +312,22 @@ function inputString(event) {
       />
     </div>
 
-    <section
-      v-if="allowsAdditional || dynamicEntries.length"
-      class="structured-collection"
-    >
+    <section v-if="allowsAdditional || dynamicEntries.length" class="structured-collection">
       <header class="structured-collection-heading">
         <div>
-          <strong>{{
-            Object.keys(properties).length ? "附加字段" : "字段"
-          }}</strong>
+          <strong>{{ Object.keys(properties).length ? "附加字段" : "字段" }}</strong>
           <small>以明确的名称和类型保存自定义配置。</small>
         </div>
         <div>
           <span>{{ dynamicEntries.length }} 项</span>
-          <UiButton
-            v-if="allowsAdditional"
-            variant="secondary"
-            @click="addEntry"
+          <UiButton v-if="allowsAdditional" variant="secondary" @click="addEntry"
             >添加字段</UiButton
           >
         </div>
       </header>
       <div v-if="dynamicEntries.length" class="structured-entry-list">
         <article v-for="([key, value], index) in dynamicEntries" :key="key">
-          <span class="structured-entry-index">{{
-            String(index + 1).padStart(2, "0")
-          }}</span>
+          <span class="structured-entry-index">{{ String(index + 1).padStart(2, "0") }}</span>
           <div class="structured-entry-copy">
             <strong>{{ key }}</strong>
             <small>{{ typeLabel(additionalSchema, value, rootSchema) }}</small>
@@ -436,10 +378,7 @@ function inputString(event) {
       </div>
       <div>
         <span>{{ arrayValue.length }} 项</span>
-        <UiButton
-          v-if="canUnset && layout !== 'dialog'"
-          variant="ghost"
-          @click="$emit('unset')"
+        <UiButton v-if="canUnset && layout !== 'dialog'" variant="ghost" @click="$emit('unset')"
           >重置</UiButton
         >
         <UiButton variant="secondary" @click="addArray">添加条目</UiButton>
@@ -447,17 +386,13 @@ function inputString(event) {
     </header>
     <div v-if="arrayValue.length" class="structured-entry-list">
       <article v-for="(value, index) in arrayValue" :key="`${path}.${index}`">
-        <span class="structured-entry-index">{{
-          String(index + 1).padStart(2, "0")
-        }}</span>
+        <span class="structured-entry-index">{{ String(index + 1).padStart(2, "0") }}</span>
         <div
           v-if="isComplex(definition.items || {}, value, rootSchema)"
           class="structured-entry-copy"
         >
           <strong>{{ summary(value) }}</strong>
-          <small>{{
-            typeLabel(definition.items || {}, value, rootSchema)
-          }}</small>
+          <small>{{ typeLabel(definition.items || {}, value, rootSchema) }}</small>
         </div>
         <StructuredField
           v-else
@@ -499,18 +434,12 @@ function inputString(event) {
   </section>
 
   <div v-else class="structured-field-row" :class="[layout, { root }]">
-    <header
-      v-if="!root || layout === 'dialog'"
-      class="structured-field-heading"
-    >
+    <header v-if="!root || layout === 'dialog'" class="structured-field-heading">
       <div>
         <strong>{{ title }}</strong>
         <small v-if="help">{{ help }}</small>
       </div>
-      <UiButton
-        v-if="canUnset && layout !== 'dialog'"
-        variant="ghost"
-        @click="$emit('unset')"
+      <UiButton v-if="canUnset && layout !== 'dialog'" variant="ghost" @click="$emit('unset')"
         >重置</UiButton
       >
       <span v-else-if="required">必填</span>
@@ -545,8 +474,7 @@ function inputString(event) {
       <span v-else-if="kind === 'null'" class="structured-null">null</span>
       <textarea
         v-else-if="
-          definition.format === 'multiline' ||
-          definition['x-meldfabric-widget'] === 'textarea'
+          definition.format === 'multiline' || definition['x-meldfabric-widget'] === 'textarea'
         "
         class="field"
         :value="modelValue ?? ''"
@@ -585,22 +513,14 @@ function inputString(event) {
   >
     <div ref="modalForm" class="structured-modal-form">
       <label v-if="modal.mode.startsWith('object')" class="structured-modal-key"
-        ><span>字段名称</span
-        ><small>名称用于程序读取，并作为 JSON 对象的键。</small
-        ><input
-          v-model="modal.key"
-          class="field"
-          :disabled="modal.mode === 'object-edit'"
-          required
+        ><span>字段名称</span><small>名称用于程序读取，并作为 JSON 对象的键。</small
+        ><input v-model="modal.key" class="field" :disabled="modal.mode === 'object-edit'" required
       /></label>
       <label
         class="structured-modal-key"
         v-if="
-          !Object.keys(
-            modal.mode.startsWith('object')
-              ? additionalSchema
-              : definition.items || {},
-          ).length
+          !Object.keys(modal.mode.startsWith('object') ? additionalSchema : definition.items || {})
+            .length
         "
       >
         <span>内容类型</span>
@@ -614,11 +534,8 @@ function inputString(event) {
       <StructuredField
         v-model="modal.value"
         :schema="
-          Object.keys(
-            modal.mode.startsWith('object')
-              ? additionalSchema
-              : definition.items || {},
-          ).length
+          Object.keys(modal.mode.startsWith('object') ? additionalSchema : definition.items || {})
+            .length
             ? modal.mode.startsWith('object')
               ? additionalSchema
               : definition.items || {}

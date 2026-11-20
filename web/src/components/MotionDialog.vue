@@ -37,8 +37,7 @@ onBeforeUnmount(() => {
   const remaining = [...document.querySelectorAll("dialog[open]")].filter(
     (el) => el !== dialog.value,
   );
-  if (!remaining.length)
-    document.documentElement.classList.remove("modal-open");
+  if (!remaining.length) document.documentElement.classList.remove("modal-open");
   if (previous?.isConnected && !previous.closest("[inert]"))
     previous.focus({ preventScroll: true });
   else
@@ -60,11 +59,7 @@ onBeforeUnmount(() => {
       }
     "
   >
-    <div
-      class="dialog-surface"
-      :class="{ 'is-closing': closing }"
-      :inert="closing"
-    >
+    <div class="dialog-surface" :class="{ 'is-closing': closing }" :inert="closing">
       <slot :dismiss="dismiss" :closing="closing" />
     </div>
   </dialog>

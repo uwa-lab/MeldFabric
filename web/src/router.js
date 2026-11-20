@@ -141,12 +141,10 @@ export const router = createRouter({
 });
 
 export function listPath(type) {
-  if (["agents", "orchestrations", "endpoints"].includes(type))
-    return `/${type}`;
+  if (["agents", "orchestrations", "endpoints"].includes(type)) return `/${type}`;
   if (["plugins", "hooks", "interventions", "graph_conditions"].includes(type))
     return `/extensions/${type}`;
   return `/resources/${type}`;
 }
 
-export const editorPath = (type, id) =>
-  `${listPath(type)}/${encodeURIComponent(id)}`;
+export const editorPath = (type, id) => `${listPath(type)}/${encodeURIComponent(id)}`;

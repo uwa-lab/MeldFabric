@@ -11,11 +11,7 @@ function revealInvalid(event) {
 }
 </script>
 <template>
-  <section
-    class="disclosure"
-    :class="{ expanded }"
-    @invalid.capture="revealInvalid"
-  >
+  <section class="disclosure" :class="{ expanded }" @invalid.capture="revealInvalid">
     <button
       type="button"
       class="disclosure-trigger"

@@ -226,13 +226,9 @@ onMounted(loadSnapshots);
           <h1 :title="systemDraft.workspace.name">
             {{ systemDraft.workspace.name }}
           </h1>
-          <UiDescription
-            >运行地址等设置重启后生效；快照与安全操作立即生效。</UiDescription
-          >
+          <UiDescription>运行地址等设置重启后生效；快照与安全操作立即生效。</UiDescription>
         </div>
-        <UiButton variant="primary" :busy="savingSystem" @click="saveSystem"
-          >保存设置</UiButton
-        >
+        <UiButton variant="primary" :busy="savingSystem" @click="saveSystem">保存设置</UiButton>
       </section>
 
       <div class="system-config-grid">
@@ -240,27 +236,16 @@ onMounted(loadSnapshots);
           <header>
             <div>
               <h2>工作空间</h2>
-              <UiDescription
-                >在后台、发现信息与 Prompt 中识别当前服务。</UiDescription
-              >
+              <UiDescription>在后台、发现信息与 Prompt 中识别当前服务。</UiDescription>
             </div>
           </header>
           <div class="workspace-fields">
-            <TechnicalId
-              label="Workspace ID"
-              :value="systemDraft.workspace.id"
-            />
+            <TechnicalId label="Workspace ID" :value="systemDraft.workspace.id" />
             <label
-              >工作空间名称<input
-                v-model="systemDraft.workspace.name"
-                class="field"
-                required
+              >工作空间名称<input v-model="systemDraft.workspace.name" class="field" required
             /></label>
             <label
-              >时区<input
-                v-model="systemDraft.workspace.timezone"
-                class="field"
-                required
+              >时区<input v-model="systemDraft.workspace.timezone" class="field" required
             /></label>
           </div>
         </section>
@@ -268,19 +253,14 @@ onMounted(loadSnapshots);
         <section class="runtime-console">
           <header>
             <div>
-              <span class="console-dot" /><span class="console-dot" /><span
-                class="console-dot"
-              />
+              <span class="console-dot" /><span class="console-dot" /><span class="console-dot" />
             </div>
             <small>service.runtime</small>
           </header>
           <div class="console-grid">
             <label
               ><span>HOST</span
-              ><input
-                v-model="systemDraft.runtime.host"
-                class="console-input"
-                required
+              ><input v-model="systemDraft.runtime.host" class="console-input" required
             /></label>
             <label
               ><span>PORT</span
@@ -301,10 +281,7 @@ onMounted(loadSnapshots);
             /></label>
             <label
               ><span>ADMIN PATH</span
-              ><input
-                v-model="systemDraft.runtime.management.path"
-                class="console-input"
-                required
+              ><input v-model="systemDraft.runtime.management.path" class="console-input" required
             /></label>
           </div>
           <footer>
@@ -336,9 +313,7 @@ onMounted(loadSnapshots);
           <div class="snapshot-composer">
             <input v-model="label" class="field" placeholder="快照名称" />
             <input v-model="note" class="field" placeholder="备注（可选）" />
-            <UiButton variant="secondary" @click="createSnapshot"
-              >创建快照</UiButton
-            >
+            <UiButton variant="secondary" @click="createSnapshot">创建快照</UiButton>
           </div>
         </header>
         <div v-if="snapshots.length" class="snapshot-timeline">
@@ -352,11 +327,8 @@ onMounted(loadSnapshots);
             </div>
             <time>{{ new Date(item.created_at).toLocaleString() }}</time>
             <div class="button-row">
-              <UiButton variant="secondary" @click="restore(item)"
-                >恢复</UiButton
-              ><UiButton variant="danger" @click="removeSnapshot(item)"
-                >删除</UiButton
-              >
+              <UiButton variant="secondary" @click="restore(item)">恢复</UiButton
+              ><UiButton variant="danger" @click="removeSnapshot(item)">删除</UiButton>
             </div>
           </article>
         </div>
@@ -367,18 +339,14 @@ onMounted(loadSnapshots);
         <article class="backup-action">
           <div>
             <h3>控制数据库备份</h3>
-            <UiDescription
-              >把配置历史、快照和密文完整复制到一次性提供的目标数据库。</UiDescription
-            >
+            <UiDescription>把配置历史、快照和密文完整复制到一次性提供的目标数据库。</UiDescription>
           </div>
           <UiButton variant="secondary" @click="openBackup">创建备份</UiButton>
         </article>
         <article class="key-action">
           <div>
             <h3>管理员 Key</h3>
-            <UiDescription
-              >设置新的管理员 Key；保存后当前登录会立即退出。</UiDescription
-            >
+            <UiDescription>设置新的管理员 Key；保存后当前登录会立即退出。</UiDescription>
           </div>
           <UiButton variant="danger" @click="openKeyEditor">修改 Key</UiButton>
         </article>
@@ -392,14 +360,9 @@ onMounted(loadSnapshots);
       @dismiss="backupOpen = false"
     >
       <form class="backup-form" @submit.prevent="runBackup">
-        <ConfigurationModes
-          v-model="backupConfigurationMode"
-          advanced-label="连接选项"
-        >
+        <ConfigurationModes v-model="backupConfigurationMode" advanced-label="连接选项">
           <template #basic>
-            <SettingRow
-              title="数据库类型"
-              description="目标数据库必须与当前控制库不同。"
+            <SettingRow title="数据库类型" description="目标数据库必须与当前控制库不同。"
               ><SelectControl
                 v-model="backup.engine"
                 :options="[
@@ -408,9 +371,7 @@ onMounted(loadSnapshots);
                   { value: 'mysql', label: 'MySQL' },
                 ]"
             /></SettingRow>
-            <SettingRow
-              title="连接 URL"
-              description="可包含用户名与密码，提交后不会持久化。"
+            <SettingRow title="连接 URL" description="可包含用户名与密码，提交后不会持久化。"
               ><input
                 v-model="backup.url"
                 class="field control-wide"
@@ -428,9 +389,7 @@ onMounted(loadSnapshots);
             />
           </template>
         </ConfigurationModes>
-        <SettingRow
-          title="管理员 Key"
-          description="备份属于高风险操作，需要现场二次验证。"
+        <SettingRow title="管理员 Key" description="备份属于高风险操作，需要现场二次验证。"
           ><input
             v-model="backup.admin_key"
             class="field control-wide"
@@ -438,9 +397,7 @@ onMounted(loadSnapshots);
             autocomplete="current-password"
             required
         /></SettingRow>
-        <SettingRow
-          title="覆盖同一工作空间"
-          description="允许覆盖目标库中属于本工作空间的旧备份。"
+        <SettingRow title="覆盖同一工作空间" description="允许覆盖目标库中属于本工作空间的旧备份。"
           ><ToggleSwitch v-model="backup.overwrite"
         /></SettingRow>
         <div v-if="backupResult" class="operation-result">
@@ -451,11 +408,8 @@ onMounted(loadSnapshots);
           </dl>
         </div>
         <div class="dialog-actions">
-          <UiButton variant="secondary" @click="backupOpen = false"
-            >关闭</UiButton
-          ><UiButton variant="primary" type="submit" :busy="backupBusy"
-            >开始备份</UiButton
-          >
+          <UiButton variant="secondary" @click="backupOpen = false">关闭</UiButton
+          ><UiButton variant="primary" type="submit" :busy="backupBusy">开始备份</UiButton>
         </div>
       </form>
     </ModalFrame>
@@ -492,9 +446,7 @@ onMounted(loadSnapshots);
         </label>
         <div class="dialog-actions">
           <UiButton variant="secondary" @click="keyOpen = false">取消</UiButton>
-          <UiButton variant="danger" type="submit" :busy="keyBusy"
-            >保存并退出</UiButton
-          >
+          <UiButton variant="danger" type="submit" :busy="keyBusy">保存并退出</UiButton>
         </div>
       </form>
     </ModalFrame>

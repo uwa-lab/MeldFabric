@@ -22,15 +22,11 @@ function collapsed() {
   };
 }
 function restoreControls(el) {
-  for (const [control, disabled] of disabledControls.get(el) || [])
-    control.disabled = disabled;
+  for (const [control, disabled] of disabledControls.get(el) || []) control.disabled = disabled;
   disabledControls.delete(el);
 }
 function stop(el) {
-  interrupted.set(
-    el,
-    props.resize ? frame(el) : { opacity: getComputedStyle(el).opacity },
-  );
+  interrupted.set(el, props.resize ? frame(el) : { opacity: getComputedStyle(el).opacity });
   cancel(el);
 }
 async function enter(el, done) {
@@ -57,8 +53,7 @@ async function leave(el, done) {
     return;
   }
   const start =
-    interrupted.get(el) ||
-    (props.resize ? frame(el) : { opacity: getComputedStyle(el).opacity });
+    interrupted.get(el) || (props.resize ? frame(el) : { opacity: getComputedStyle(el).opacity });
   interrupted.delete(el);
   if (el.contains(document.activeElement) && el.id) {
     document
@@ -67,18 +62,15 @@ async function leave(el, done) {
   }
   el.inert = true;
   if (!props.persistent && !disabledControls.has(el)) {
-    const controls = [
-      ...el.querySelectorAll("input, select, textarea, button"),
-    ].map((control) => [control, control.disabled]);
+    const controls = [...el.querySelectorAll("input, select, textarea, button")].map((control) => [
+      control,
+      control.disabled,
+    ]);
     disabledControls.set(el, controls);
     for (const [control] of controls) control.disabled = true;
   }
   try {
-    await play(
-      el,
-      [start, props.resize ? collapsed() : { opacity: 0 }],
-      "exit",
-    );
+    await play(el, [start, props.resize ? collapsed() : { opacity: 0 }], "exit");
   } finally {
     done();
   }

@@ -1,13 +1,5 @@
 <script setup>
-import {
-  computed,
-  nextTick,
-  onBeforeUnmount,
-  onMounted,
-  reactive,
-  ref,
-  useId,
-} from "vue";
+import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, useId } from "vue";
 import { notify, state } from "../store.js";
 import { useInfiniteCanvas } from "../composables/useInfiniteCanvas.js";
 import ContextMenu from "./ContextMenu.vue";
@@ -17,12 +9,12 @@ import SelectControl from "./SelectControl.vue";
 import TechnicalId from "./TechnicalId.vue";
 
 const props = defineProps({
-  draft: { type: Object, required: true },
   agents: { type: Array, default: () => [] },
   remotes: { type: Array, default: () => [] },
   conditionOptions: { type: Array, default: () => [] },
   conditionDefinitions: { type: Array, default: () => [] },
 });
+const draft = defineModel("draft", { type: Object, required: true });
 
 const cardWidth = 214;
 const cardHeight = 98;
@@ -36,19 +28,19 @@ const menu = reactive({ open: false, x: 0, y: 0, node: null });
 const configuringEdge = ref(null);
 
 const graphOptionSources = computed(() => ({
-  graph_nodes: props.draft.nodes.map((node) => ({
+  graph_nodes: draft.value.nodes.map((node) => ({
     value: node.id,
     label: nodeName(node),
     description: node.id,
   })),
-  graph_agent_nodes: props.draft.nodes
+  graph_agent_nodes: draft.value.nodes
     .filter((node) => node.target_type === "agent")
     .map((node) => ({
       value: node.id,
       label: nodeName(node),
       description: node.id,
     })),
-  graph_remote_nodes: props.draft.nodes
+  graph_remote_nodes: draft.value.nodes
     .filter((node) => node.target_type === "remote_agent")
     .map((node) => ({
       value: node.id,
@@ -58,9 +50,7 @@ const graphOptionSources = computed(() => ({
 }));
 
 function conditionDefinition(edge) {
-  return props.conditionDefinitions.find(
-    (item) => item.id === edge.condition_registration_id,
-  );
+  return props.conditionDefinitions.find((item) => item.id === edge.condition_registration_id);
 }
 
 function setCondition(edge, value) {
@@ -70,12 +60,12 @@ function setCondition(edge, value) {
 }
 
 const automaticPositions = computed(() => {
-  const nodeMap = new Map(props.draft.nodes.map((node) => [node.id, node]));
+  const nodeMap = new Map(draft.value.nodes.map((node) => [node.id, node]));
   const levels = new Map();
   function level(nodeId, trail = new Set()) {
     if (levels.has(nodeId)) return levels.get(nodeId);
     if (trail.has(nodeId)) return 0;
-    const incoming = props.draft.edges
+    const incoming = draft.value.edges
       .filter((edge) => edge.target === nodeId && nodeMap.has(edge.source))
       .map((edge) => edge.source);
     const nextTrail = new Set(trail).add(nodeId);
@@ -85,10 +75,10 @@ const automaticPositions = computed(() => {
     levels.set(nodeId, value);
     return value;
   }
-  props.draft.nodes.forEach((node) => level(node.id));
+  draft.value.nodes.forEach((node) => level(node.id));
   const rows = new Map();
   const result = new Map();
-  props.draft.nodes.forEach((node) => {
+  draft.value.nodes.forEach((node) => {
     const column = levels.get(node.id) || 0;
     const row = rows.get(column) || 0;
     rows.set(column, row + 1);
@@ -101,16 +91,14 @@ const automaticPositions = computed(() => {
 });
 
 function positionOf(node) {
-  return (
-    node.position || automaticPositions.value.get(node.id) || { x: 0, y: 0 }
-  );
+  return node.position || automaticPositions.value.get(node.id) || { x: 0, y: 0 };
 }
 function updatePosition(node, position) {
   node.position = { x: Math.round(position.x), y: Math.round(position.y) };
 }
 
 const canvasTools = useInfiniteCanvas({
-  items: () => props.draft.nodes,
+  items: () => draft.value.nodes,
   positionOf,
   updatePosition,
   nodeWidth: cardWidth,
@@ -124,14 +112,10 @@ function bezier(source, target) {
 }
 
 const edgeLines = computed(() =>
-  props.draft.edges
+  draft.value.edges
     .map((edge) => {
-      const sourceNode = props.draft.nodes.find(
-        (node) => node.id === edge.source,
-      );
-      const targetNode = props.draft.nodes.find(
-        (node) => node.id === edge.target,
-      );
+      const sourceNode = draft.value.nodes.find((node) => node.id === edge.source);
+      const targetNode = draft.value.nodes.find((node) => node.id === edge.target);
       if (!sourceNode || !targetNode) return null;
       const source = positionOf(sourceNode);
       const target = positionOf(targetNode);
@@ -147,30 +131,25 @@ const edgeLines = computed(() =>
 );
 
 const temporaryLine = computed(() => {
-  const node = props.draft.nodes.find(
-    (item) => item.id === connectionSource.value,
-  );
+  const node = draft.value.nodes.find((item) => item.id === connectionSource.value);
   if (!node) return null;
   const position = positionOf(node);
-  return bezier(
-    { x: position.x + cardWidth, y: position.y + cardHeight / 2 },
-    cursor,
-  );
+  return bezier({ x: position.x + cardWidth, y: position.y + cardHeight / 2 }, cursor);
 });
 
 const contextItems = computed(() => {
   const node = menu.node;
   if (!node) return [];
-  const isEntry = props.draft.entry_points.includes(node.id);
-  const isPrimary = props.draft.primary_entry_point === node.id;
-  const localNodesAfterDelete = props.draft.nodes.filter(
+  const isEntry = draft.value.entry_points.includes(node.id);
+  const isPrimary = draft.value.primary_entry_point === node.id;
+  const localNodesAfterDelete = draft.value.nodes.filter(
     (item) => item.id !== node.id && item.target_type === "agent",
   );
   return [
     {
       id: "entry",
       label: isEntry ? "取消启动节点" : "设为启动节点",
-      disabled: isEntry && (props.draft.entry_points.length === 1 || isPrimary),
+      disabled: isEntry && (draft.value.entry_points.length === 1 || isPrimary),
       hint: isPrimary ? "请先指定其他主入口" : null,
     },
     {
@@ -185,7 +164,7 @@ const contextItems = computed(() => {
       id: "delete",
       label: "删除节点",
       danger: true,
-      disabled: props.draft.nodes.length === 1 || !localNodesAfterDelete.length,
+      disabled: draft.value.nodes.length === 1 || !localNodesAfterDelete.length,
     },
   ];
 });
@@ -207,48 +186,38 @@ function nodeName(node) {
   return target?.display_name || target?.name || "选择执行目标";
 }
 function edgeNodeName(nodeId) {
-  const node = props.draft.nodes.find((item) => item.id === nodeId);
+  const node = draft.value.nodes.find((item) => item.id === nodeId);
   return node ? nodeName(node) : "节点不可用";
 }
 function normalizeEntries() {
-  props.draft.entry_points = [
+  draft.value.entry_points = [
     ...new Set(
-      props.draft.entry_points.filter((id) =>
-        props.draft.nodes.some((node) => node.id === id),
-      ),
+      draft.value.entry_points.filter((id) => draft.value.nodes.some((node) => node.id === id)),
     ),
   ];
-  if (!props.draft.entry_points.length) {
-    const fallback = props.draft.nodes.find(
-      (node) => node.target_type === "agent",
-    );
-    if (fallback) props.draft.entry_points.push(fallback.id);
+  if (!draft.value.entry_points.length) {
+    const fallback = draft.value.nodes.find((node) => node.target_type === "agent");
+    if (fallback) draft.value.entry_points.push(fallback.id);
   }
   if (
-    !props.draft.entry_points.some(
-      (id) =>
-        props.draft.nodes.find((node) => node.id === id)?.target_type ===
-        "agent",
+    !draft.value.entry_points.some(
+      (id) => draft.value.nodes.find((node) => node.id === id)?.target_type === "agent",
     )
   ) {
-    const fallback = props.draft.nodes.find(
-      (node) => node.target_type === "agent",
-    );
-    if (fallback) props.draft.entry_points.unshift(fallback.id);
+    const fallback = draft.value.nodes.find((node) => node.target_type === "agent");
+    if (fallback) draft.value.entry_points.unshift(fallback.id);
   }
-  const primary = props.draft.nodes.find(
+  const primary = draft.value.nodes.find(
     (node) =>
-      node.id === props.draft.primary_entry_point &&
+      node.id === draft.value.primary_entry_point &&
       node.target_type === "agent" &&
-      props.draft.entry_points.includes(node.id),
+      draft.value.entry_points.includes(node.id),
   );
   if (!primary) {
-    const fallback = props.draft.nodes.find(
-      (node) =>
-        node.target_type === "agent" &&
-        props.draft.entry_points.includes(node.id),
+    const fallback = draft.value.nodes.find(
+      (node) => node.target_type === "agent" && draft.value.entry_points.includes(node.id),
     );
-    props.draft.primary_entry_point = fallback?.id || null;
+    draft.value.primary_entry_point = fallback?.id || null;
   }
 }
 function addNode(targetType) {
@@ -259,40 +228,33 @@ function addNode(targetType) {
     target_ref: pool[0]?.id || null,
     position: canvasTools.centerWorld(),
   };
-  props.draft.nodes.push(node);
-  if (!props.draft.entry_points.length && targetType === "agent") {
-    props.draft.entry_points.push(node.id);
-    props.draft.primary_entry_point = node.id;
+  draft.value.nodes.push(node);
+  if (!draft.value.entry_points.length && targetType === "agent") {
+    draft.value.entry_points.push(node.id);
+    draft.value.primary_entry_point = node.id;
   }
 }
 function removeNode(node) {
-  props.draft.nodes = props.draft.nodes.filter((item) => item.id !== node.id);
-  props.draft.edges = props.draft.edges.filter(
+  draft.value.nodes = draft.value.nodes.filter((item) => item.id !== node.id);
+  draft.value.edges = draft.value.edges.filter(
     (edge) => edge.source !== node.id && edge.target !== node.id,
   );
-  props.draft.entry_points = props.draft.entry_points.filter(
-    (id) => id !== node.id,
-  );
+  draft.value.entry_points = draft.value.entry_points.filter((id) => id !== node.id);
   normalizeEntries();
   if (editingNode.value === node.id) editingNode.value = null;
   if (connectionSource.value === node.id) connectionSource.value = null;
 }
 function toggleEntry(node) {
-  if (props.draft.entry_points.includes(node.id)) {
-    props.draft.entry_points = props.draft.entry_points.filter(
-      (id) => id !== node.id,
-    );
+  if (draft.value.entry_points.includes(node.id)) {
+    draft.value.entry_points = draft.value.entry_points.filter((id) => id !== node.id);
   } else {
-    props.draft.entry_points.push(node.id);
+    draft.value.entry_points.push(node.id);
   }
   normalizeEntries();
 }
 function setPrimary(node) {
-  if (
-    node.target_type === "agent" &&
-    props.draft.entry_points.includes(node.id)
-  )
-    props.draft.primary_entry_point = node.id;
+  if (node.target_type === "agent" && draft.value.entry_points.includes(node.id))
+    draft.value.primary_entry_point = node.id;
 }
 function connectTo(node) {
   const source = connectionSource.value;
@@ -301,16 +263,12 @@ function connectTo(node) {
     notify("节点不能连接自身", true);
     return;
   }
-  if (
-    props.draft.edges.some(
-      (edge) => edge.source === source && edge.target === node.id,
-    )
-  ) {
+  if (draft.value.edges.some((edge) => edge.source === source && edge.target === node.id)) {
     notify("这条连接已经存在", true);
     connectionSource.value = null;
     return;
   }
-  props.draft.edges.push({
+  draft.value.edges.push({
     id: generated("edge"),
     source,
     target: node.id,
@@ -359,15 +317,14 @@ async function copyNodeId(node) {
   }
 }
 function resetLayout() {
-  props.draft.nodes.forEach((node) => {
+  draft.value.nodes.forEach((node) => {
     const automatic = automaticPositions.value.get(node.id);
     if (automatic) updatePosition(node, automatic);
   });
   nextTick(() =>
     canvasTools.centerOn(
-      props.draft.nodes.find(
-        (node) => node.id === props.draft.primary_entry_point,
-      ) || props.draft.nodes[0],
+      draft.value.nodes.find((node) => node.id === draft.value.primary_entry_point) ||
+        draft.value.nodes[0],
     ),
   );
 }
@@ -387,9 +344,8 @@ onMounted(() => {
   window.addEventListener("keydown", escape);
   nextTick(() =>
     canvasTools.centerOn(
-      props.draft.nodes.find(
-        (node) => node.id === props.draft.primary_entry_point,
-      ) || props.draft.nodes[0],
+      draft.value.nodes.find((node) => node.id === draft.value.primary_entry_point) ||
+        draft.value.nodes[0],
     ),
   );
 });
@@ -400,13 +356,8 @@ onBeforeUnmount(() => window.removeEventListener("keydown", escape));
   <div class="blueprint-builder">
     <div class="blueprint-toolbar">
       <div class="button-row">
-        <UiButton variant="secondary" @click="addNode('agent')"
-          >添加 Agent</UiButton
-        >
-        <UiButton
-          v-if="remotes.length"
-          variant="secondary"
-          @click="addNode('remote_agent')"
+        <UiButton variant="secondary" @click="addNode('agent')">添加 Agent</UiButton>
+        <UiButton v-if="remotes.length" variant="secondary" @click="addNode('remote_agent')"
           >添加 A2A</UiButton
         >
         <UiButton variant="ghost" @click="resetLayout">复位</UiButton>
@@ -420,12 +371,8 @@ onBeforeUnmount(() => window.removeEventListener("keydown", escape));
             min="1"
             aria-label="Graph 最大节点执行次数"
         /></label>
-        <span v-if="connectionSource" class="connection-hint"
-          >选择目标节点 · Esc 取消</span
-        >
-        <span v-else class="canvas-hint"
-          >拖动画布 · 拖拽节点 · 右击打开操作</span
-        >
+        <span v-if="connectionSource" class="connection-hint">选择目标节点 · Esc 取消</span>
+        <span v-else class="canvas-hint">拖动画布 · 拖拽节点 · 右击打开操作</span>
       </div>
     </div>
 
@@ -448,14 +395,7 @@ onBeforeUnmount(() => window.removeEventListener("keydown", escape));
         >
           <circle cx="1" cy="1" r="0.8" />
         </pattern>
-        <marker
-          :id="markerId"
-          markerWidth="8"
-          markerHeight="8"
-          refX="7"
-          refY="4"
-          orient="auto"
-        >
+        <marker :id="markerId" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
           <path d="M0,0 L8,4 L0,8 Z" />
         </marker>
       </defs>
@@ -497,10 +437,7 @@ onBeforeUnmount(() => window.removeEventListener("keydown", escape));
           >
             <div class="blueprint-node-meta">
               <span>{{ node.target_type === "agent" ? "AGENT" : "A2A" }}</span>
-              <span
-                v-if="draft.primary_entry_point === node.id"
-                class="entry-mark"
-                >主入口</span
+              <span v-if="draft.primary_entry_point === node.id" class="entry-mark">主入口</span
               ><span
                 v-else-if="draft.entry_points.includes(node.id)"
                 class="entry-mark secondary-entry"
@@ -529,18 +466,10 @@ onBeforeUnmount(() => window.removeEventListener("keydown", escape));
                 ↻
               </button>
             </div>
-            <small class="canvas-technical-id" :title="node.id">{{
-              node.id
-            }}</small>
+            <small class="canvas-technical-id" :title="node.id">{{ node.id }}</small>
           </article>
         </foreignObject>
-        <foreignObject
-          v-if="!draft.nodes.length"
-          x="-210"
-          y="-70"
-          width="420"
-          height="140"
-        >
+        <foreignObject v-if="!draft.nodes.length" x="-210" y="-70" width="420" height="140">
           <div class="blueprint-empty">
             <strong>添加第一个 Agent 节点</strong>
             <span>画布没有边界，复位会回到入口节点。</span>
@@ -565,17 +494,12 @@ onBeforeUnmount(() => window.removeEventListener("keydown", escape));
           variant="ghost"
           @click="configuringEdge = edge"
           >{{
-            Object.keys(
-              conditionDefinition(edge)?.config_schema?.properties || {},
-            ).length
+            Object.keys(conditionDefinition(edge)?.config_schema?.properties || {}).length
               ? "配置"
               : "查看上下文"
           }}</UiButton
         >
-        <UiButton
-          variant="danger"
-          aria-label="删除连接"
-          @click="draft.edges.splice(index, 1)"
+        <UiButton variant="danger" aria-label="删除连接" @click="draft.edges.splice(index, 1)"
           >×</UiButton
         >
       </article>
@@ -612,11 +536,7 @@ onBeforeUnmount(() => window.removeEventListener("keydown", escape));
             :value="configuringEdge.target"
             :detail="edgeNodeName(configuringEdge.target)"
           />
-          <TechnicalId
-            v-if="draft.id"
-            label="Orchestration ID"
-            :value="draft.id"
-          />
+          <TechnicalId v-if="draft.id" label="Orchestration ID" :value="draft.id" />
           <TechnicalId
             v-if="state.config?.workspace?.id"
             label="Workspace ID"

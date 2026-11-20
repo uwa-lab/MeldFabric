@@ -40,10 +40,8 @@ const form = ref();
 const clone = (value) => JSON.parse(JSON.stringify(value));
 
 function defaultEntity(type) {
-  const firstAgent =
-    collection("agents").find((item) => item.enabled !== false)?.id || null;
-  const firstProvider =
-    route.query.provider || collection("model_providers")[0]?.id || null;
+  const firstAgent = collection("agents").find((item) => item.enabled !== false)?.id || null;
+  const firstProvider = route.query.provider || collection("model_providers")[0]?.id || null;
   const defaults = {
     agents: {
       name: "new_agent",
@@ -263,15 +261,9 @@ function defaultEntity(type) {
 const existing = creating.value
   ? null
   : collection(effectiveType.value).find((item) => item.id === props.id);
-const draft = ref(
-  existing ? clone(existing) : defaultEntity(effectiveType.value),
-);
+const draft = ref(existing ? clone(existing) : defaultEntity(effectiveType.value));
 const initial = ref(JSON.stringify(draft.value));
-watch(
-  draft,
-  (value) => setEditorDirty(JSON.stringify(value) !== initial.value),
-  { deep: true },
-);
+watch(draft, (value) => setEditorDirty(JSON.stringify(value) !== initial.value), { deep: true });
 
 const title = computed(() =>
   creating.value
@@ -298,40 +290,26 @@ async function save() {
       result = await saveTool(props.id, {
         enabled: draft.value.enabled,
         display_name: draft.value.display_name,
-        description: draft.value.description_overridden
-          ? draft.value.description
-          : "",
+        description: draft.value.description_overridden ? draft.value.description : "",
         requires_sandbox: draft.value.requires_sandbox,
         parameter_descriptions: draft.value.parameter_descriptions,
       });
     } else {
-      result = await saveEntity(
-        effectiveType.value,
-        draft.value,
-        creating.value ? null : props.id,
-      );
+      result = await saveEntity(effectiveType.value, draft.value, creating.value ? null : props.id);
       if (
         secret.value &&
-        [
-          "model_providers",
-          "mcp_servers",
-          "remote_agents",
-          "observability_providers",
-        ].includes(effectiveType.value)
+        ["model_providers", "mcp_servers", "remote_agents", "observability_providers"].includes(
+          effectiveType.value,
+        )
       )
         await saveSecret(effectiveType.value, result.id, secret.value);
     }
     setEditorDirty(false);
     if (creating.value) {
-      const query =
-        effectiveType.value === "model_providers"
-          ? { entity: "model_providers" }
-          : {};
+      const query = effectiveType.value === "model_providers" ? { entity: "model_providers" } : {};
       await router.replace({ path: editorPath(props.type, result.id), query });
     } else {
-      const fresh = collection(effectiveType.value).find(
-        (item) => item.id === props.id,
-      );
+      const fresh = collection(effectiveType.value).find((item) => item.id === props.id);
       if (fresh) {
         draft.value = clone(fresh);
         initial.value = JSON.stringify(draft.value);
@@ -363,9 +341,7 @@ async function showReferences() {
 
 async function showTopology() {
   try {
-    topologyData.value = await api(
-      `/admin/agents/${encodeURIComponent(props.id)}/remote-topology`,
-    );
+    topologyData.value = await api(`/admin/agents/${encodeURIComponent(props.id)}/remote-topology`);
   } catch (error) {
     notify(error.message, true);
   }
@@ -378,11 +354,7 @@ onBeforeUnmount(() => setEditorDirty(false));
   <div class="route-view">
     <div v-if="draft" class="entity-editor-page">
       <header class="editor-heading">
-        <button
-          type="button"
-          class="back-link"
-          @click="router.push(listPath(type))"
-        >
+        <button type="button" class="back-link" @click="router.push(listPath(type))">
           ← 返回列表
         </button>
         <div class="editor-title-row">
@@ -404,10 +376,7 @@ onBeforeUnmount(() => setEditorDirty(false));
               @click="showTopology"
               >查看拓扑</UiButton
             >
-            <UiButton
-              v-if="!creating"
-              variant="secondary"
-              @click="showReferences"
+            <UiButton v-if="!creating" variant="secondary" @click="showReferences"
               >查看引用</UiButton
             >
             <UiButton
@@ -417,30 +386,28 @@ onBeforeUnmount(() => setEditorDirty(false));
               @click="remove"
               >删除</UiButton
             >
-            <UiButton variant="primary" :busy="state.saving" @click="save"
-              >保存</UiButton
-            >
+            <UiButton variant="primary" :busy="state.saving" @click="save">保存</UiButton>
           </div>
         </div>
       </header>
       <form ref="form" @submit.prevent="save">
-        <AgentConfigEditor v-if="effectiveType === 'agents'" :draft="draft" />
+        <AgentConfigEditor v-if="effectiveType === 'agents'" v-model:draft="draft" />
         <OrchestrationConfigEditor
           v-else-if="effectiveType === 'orchestrations'"
-          :draft="draft"
+          v-model:draft="draft"
           :creating="creating"
         />
         <EndpointConfigEditor
           v-else-if="effectiveType === 'endpoints'"
-          :draft="draft"
+          v-model:draft="draft"
           :creating="creating"
           :entity-id="id"
         />
         <ResourceConfigEditor
           v-else
+          v-model:draft="draft"
           v-model:secret="secret"
           :type="effectiveType"
-          :draft="draft"
           :creating="creating"
           :entity-id="id"
         />
@@ -448,16 +415,10 @@ onBeforeUnmount(() => setEditorDirty(false));
     </div>
     <div v-else class="empty-state large">
       <strong>配置不存在</strong
-      ><UiButton variant="secondary" @click="router.push(listPath(type))"
-        >返回列表</UiButton
-      >
+      ><UiButton variant="secondary" @click="router.push(listPath(type))">返回列表</UiButton>
     </div>
 
-    <ModalFrame
-      v-if="referenceData"
-      title="资源引用"
-      @dismiss="referenceData = null"
-    >
+    <ModalFrame v-if="referenceData" title="资源引用" @dismiss="referenceData = null">
       <div v-if="referenceData.total" class="reference-groups">
         <section v-for="group in referenceData.groups" :key="group.module">
           <h3>{{ group.label }}</h3>
@@ -505,10 +466,7 @@ onBeforeUnmount(() => setEditorDirty(false));
         >
       </div>
       <div v-if="topologyData.edges.length" class="topology-list">
-        <article
-          v-for="edge in topologyData.edges"
-          :key="`${edge.source}:${edge.target}`"
-        >
+        <article v-for="edge in topologyData.edges" :key="`${edge.source}:${edge.target}`">
           <code>{{ edge.source }}</code
           ><span>→</span><code>{{ edge.target }}</code>
         </article>
@@ -522,10 +480,7 @@ onBeforeUnmount(() => setEditorDirty(false));
       </div>
       <div v-if="topologyData.unreachable.length" class="topology-warning">
         <strong>无法完成检查</strong>
-        <p
-          v-for="item in topologyData.unreachable"
-          :key="item.remote_agent_ref"
-        >
+        <p v-for="item in topologyData.unreachable" :key="item.remote_agent_ref">
           {{ item.remote_agent_ref }}：{{ item.message }}
         </p>
       </div>

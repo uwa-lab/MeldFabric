@@ -39,18 +39,18 @@ default = "github-actions <actions@github.com>"
 minor_tags = ["update"]
 patch_tags = ["feat", "fix", "perf", "chore", "refactor", "style"]
 allowed_tags = [
-    "build",
-    "chore",
-    "ci",
-    "docs",
-    "feat",
-    "fix",
-    "perf",
-    "refactor",
-    "revert",
-    "style",
-    "test",
-    "update",
+  "build",
+  "chore",
+  "ci",
+  "docs",
+  "feat",
+  "fix",
+  "perf",
+  "refactor",
+  "revert",
+  "style",
+  "test",
+  "update",
 ]
 default_bump_level = 0
 parse_squash_commits = true

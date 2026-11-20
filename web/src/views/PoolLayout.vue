@@ -7,21 +7,17 @@ import { state } from "../store.js";
 const props = defineProps({ group: String });
 const route = useRoute();
 const sections = computed(() => {
-  const source =
-    props.group === "extensions" ? extensionSections : resourceSections;
+  const source = props.group === "extensions" ? extensionSections : resourceSections;
   const result = { ...source };
   if (props.group === "resources") {
     if (!state.features?.resource_pools?.mcp_servers) delete result.mcp_servers;
-    if (!state.features?.resource_pools?.sandbox_profiles)
-      delete result.sandbox_profiles;
+    if (!state.features?.resource_pools?.sandbox_profiles) delete result.sandbox_profiles;
     if (!state.features?.resource_pools?.observability_providers)
       delete result.observability_providers;
   }
   return result;
 });
-const base = computed(() =>
-  props.group === "extensions" ? "/extensions" : "/resources",
-);
+const base = computed(() => (props.group === "extensions" ? "/extensions" : "/resources"));
 </script>
 
 <template>

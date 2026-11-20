@@ -11,9 +11,7 @@ const props = defineProps({
 const emit = defineEmits(["update:modelValue"]);
 const nodes = ref([]);
 const selectedIndex = computed(() =>
-  props.options.findIndex((option) =>
-    Object.is(option.value, props.modelValue),
-  ),
+  props.options.findIndex((option) => Object.is(option.value, props.modelValue)),
 );
 
 function move(from, direction) {
@@ -45,9 +43,7 @@ function move(from, direction) {
       type="button"
       role="radio"
       :aria-checked="Object.is(option.value, modelValue)"
-      :tabindex="
-        index === selectedIndex || (selectedIndex < 0 && index === 0) ? 0 : -1
-      "
+      :tabindex="index === selectedIndex || (selectedIndex < 0 && index === 0) ? 0 : -1"
       :disabled="disabled || option.disabled"
       :class="{ selected: Object.is(option.value, modelValue) }"
       @click="emit('update:modelValue', option.value)"

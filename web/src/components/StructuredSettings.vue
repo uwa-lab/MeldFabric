@@ -23,9 +23,7 @@ const configuredCount = computed(() => {
     return Object.keys(props.modelValue).length;
   return props.modelValue === undefined || props.modelValue === null ? 0 : 1;
 });
-const schemaCount = computed(
-  () => Object.keys(props.schema?.properties || {}).length,
-);
+const schemaCount = computed(() => Object.keys(props.schema?.properties || {}).length);
 const status = computed(() =>
   configuredCount.value ? `已设置 ${configuredCount.value} 项` : "使用默认值",
 );
@@ -56,9 +54,7 @@ const status = computed(() =>
         <strong>{{ title }}</strong>
         <small v-if="description">{{ description }}</small>
       </div>
-      <span v-if="schemaCount" class="structured-settings-status"
-        >{{ schemaCount }} 个字段</span
-      >
+      <span v-if="schemaCount" class="structured-settings-status">{{ schemaCount }} 个字段</span>
     </header>
     <StructuredDataEditor
       :model-value="modelValue"

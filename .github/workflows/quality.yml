@@ -37,7 +37,7 @@ jobs:
           uv sync --frozen
           npm --prefix web ci
       - name: Run code quality checks
-        run: uv run pre-commit run --all-files
+        run: uv run pre-commit run --all-files --show-diff-on-failure
       - name: Build frontend
         run: npm --prefix web run build
       - name: Run tests

@@ -17,12 +17,7 @@ function settle(value) {
   >
     <div class="confirm-copy">{{ current.message }}</div>
     <template #footer="{ dismiss, closing }">
-      <UiButton
-        variant="secondary"
-        autofocus
-        :disabled="closing"
-        @click="dismiss(false)"
-      >
+      <UiButton variant="secondary" autofocus :disabled="closing" @click="dismiss(false)">
         取消
       </UiButton>
       <UiButton

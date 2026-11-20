@@ -11,8 +11,8 @@ function walk(dir) {
 const sources = [
   ...walk(resolve(root, "src")),
   ...walk(resolve(root, "scripts")),
-  ...["index.html", "package.json", "package-lock.json", "vite.config.js"].map(
-    (name) => resolve(root, name),
+  ...["index.html", "package.json", "package-lock.json", "vite.config.js"].map((name) =>
+    resolve(root, name),
   ),
 ].sort();
 const hash = createHash("sha256");

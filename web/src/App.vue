@@ -2,14 +2,7 @@
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { credentials, rootPath } from "./api.js";
-import {
-  state,
-  dirty,
-  load,
-  logout,
-  applyLatestConfig,
-  dismissNotification,
-} from "./store.js";
+import { state, dirty, load, logout, applyLatestConfig, dismissNotification } from "./store.js";
 import { confirmAction, confirmation } from "./dialogs.js";
 import { titles } from "./domain/metadata.js";
 import Icon from "./components/Icon.vue";
@@ -28,9 +21,7 @@ const mobileMenu = ref(false);
 const mainContent = ref(null);
 const reconciliationOpen = ref(false);
 const reconciliationCount = computed(
-  () =>
-    (state.reconciliation?.active?.total || 0) +
-    (state.reconciliation?.latest?.total || 0),
+  () => (state.reconciliation?.active?.total || 0) + (state.reconciliation?.latest?.total || 0),
 );
 
 const groups = [
@@ -91,17 +82,12 @@ async function login() {
 }
 
 async function reload() {
-  if (dirty.value && !(await confirmAction("放弃当前页面尚未保存的修改？")))
-    return;
+  if (dirty.value && !(await confirmAction("放弃当前页面尚未保存的修改？"))) return;
   await load();
 }
 
 async function exit() {
-  if (
-    dirty.value &&
-    !(await confirmAction("放弃当前页面尚未保存的修改并退出？"))
-  )
-    return;
+  if (dirty.value && !(await confirmAction("放弃当前页面尚未保存的修改并退出？"))) return;
   logout();
   router.replace("/");
 }
@@ -126,8 +112,7 @@ onMounted(async () => {
     if (credentials.get()) await load();
   } catch (error) {
     credentials.set("");
-    loginError.value =
-      error.status === 401 ? "请重新输入管理员 Key" : error.message;
+    loginError.value = error.status === 401 ? "请重新输入管理员 Key" : error.message;
   } finally {
     starting.value = false;
   }
@@ -140,11 +125,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <section
-    v-if="starting && credentials.get()"
-    class="session-loading"
-    role="status"
-  >
+  <section v-if="starting && credentials.get()" class="session-loading" role="status">
     <div class="brand-mark">MF</div>
     <p>正在打开工作空间…</p>
   </section>
@@ -157,9 +138,7 @@ onUnmounted(() => {
     <div class="brand-mark large">MF</div>
     <div>
       <h1>服务已临时关闭</h1>
-      <UiDescription
-        >管理后台与业务接口将在服务进程重启后恢复访问。</UiDescription
-      >
+      <UiDescription>管理后台与业务接口将在服务进程重启后恢复访问。</UiDescription>
     </div>
   </section>
 
@@ -180,12 +159,7 @@ onUnmounted(() => {
         placeholder="meldfabric_admin_…"
         required
       />
-      <UiButton
-        type="submit"
-        variant="primary"
-        class="wide"
-        :busy="authenticating"
-      >
+      <UiButton type="submit" variant="primary" class="wide" :busy="authenticating">
         {{ authenticating ? "正在验证…" : "进入工作台" }}
       </UiButton>
       <p v-if="loginError" class="form-error" role="alert">{{ loginError }}</p>
@@ -196,9 +170,7 @@ onUnmounted(() => {
     <aside class="sidebar" :class="{ open: mobileMenu }">
       <div class="brand">
         <div class="brand-mark">MF</div>
-        <div class="brand-copy">
-          <strong>MeldFabric</strong><small>Strands 控制台</small>
-        </div>
+        <div class="brand-copy"><strong>MeldFabric</strong><small>Strands 控制台</small></div>
       </div>
       <nav class="primary-nav" aria-label="主导航">
         <section v-for="group in groups" :key="group.label" class="nav-group">
@@ -215,9 +187,7 @@ onUnmounted(() => {
         </section>
       </nav>
       <div class="sidebar-footer">
-        <a :href="rootPath + '/docs'" target="_blank" rel="noopener"
-          >API 文档 ↗</a
-        >
+        <a :href="rootPath + '/docs'" target="_blank" rel="noopener">API 文档 ↗</a>
         <button type="button" @click="exit">退出</button>
       </div>
     </aside>
@@ -225,16 +195,10 @@ onUnmounted(() => {
     <main class="main-shell">
       <header class="topbar">
         <div class="topbar-title">
-          <button
-            class="mobile-menu"
-            type="button"
-            @click="mobileMenu = !mobileMenu"
-          >
+          <button class="mobile-menu" type="button" @click="mobileMenu = !mobileMenu">
             <Icon name="menu" />
           </button>
-          <span :title="state.config.workspace.name">{{
-            state.config.workspace.name
-          }}</span>
+          <span :title="state.config.workspace.name">{{ state.config.workspace.name }}</span>
           <span class="breadcrumb-separator">/</span>
           <strong :title="pageTitle">{{ pageTitle }}</strong>
         </div>
@@ -250,10 +214,7 @@ onUnmounted(() => {
             <span v-if="reconciliationCount">{{ reconciliationCount }}</span>
           </button>
           <span v-if="dirty" class="draft-state">未保存</span>
-          <span
-            v-else-if="state.configStatus?.has_unapplied_changes"
-            class="apply-state"
-          >
+          <span v-else-if="state.configStatus?.has_unapplied_changes" class="apply-state">
             有配置更新待应用
           </span>
           <UiButton
@@ -263,9 +224,7 @@ onUnmounted(() => {
             @click="applyLatestConfig"
             >应用配置</UiButton
           >
-          <UiButton variant="ghost" :disabled="state.saving" @click="reload"
-            >刷新</UiButton
-          >
+          <UiButton variant="ghost" :disabled="state.saving" @click="reload">刷新</UiButton>
         </div>
       </header>
       <div ref="mainContent" class="main-content">

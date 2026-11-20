@@ -17,15 +17,11 @@ const instances = computed(() => status.value?.instances || []);
 const readyInstances = computed(
   () => instances.value.filter((item) => item.status === "ready").length,
 );
-const availableAdapters = computed(
-  () => adapters.value.filter((item) => item.available).length,
-);
+const availableAdapters = computed(() => adapters.value.filter((item) => item.available).length);
 const health = computed(() => {
   if (issues.value.length) return { label: "需要处理", tone: "danger" };
-  if (status.value?.has_unapplied_changes)
-    return { label: "有配置待发布", tone: "warning" };
-  if (!status.value?.fully_applied)
-    return { label: "正在同步", tone: "warning" };
+  if (status.value?.has_unapplied_changes) return { label: "有配置待发布", tone: "warning" };
+  if (!status.value?.fully_applied) return { label: "正在同步", tone: "warning" };
   return { label: "运行正常", tone: "success" };
 });
 const latestApplied = computed(() => !status.value?.has_unapplied_changes);
@@ -56,13 +52,13 @@ onMounted(refresh);
         <p class="eyebrow">RUNTIME HEALTH</p>
         <h1>{{ health.label }}</h1>
         <UiDescription>
-          {{ readyInstances }}/{{ instances.length }} 个实例就绪 ·
-          {{ availableAdapters }}/{{ adapters.length }} 项可选能力可用
+          {{ readyInstances }}/{{ instances.length }} 个实例就绪 · {{ availableAdapters }}/{{
+            adapters.length
+          }}
+          项可选能力可用
         </UiDescription>
       </div>
-      <UiButton variant="secondary" :busy="loading" @click="refresh">
-        重新检查
-      </UiButton>
+      <UiButton variant="secondary" :busy="loading" @click="refresh"> 重新检查 </UiButton>
     </section>
 
     <section class="config-progress" aria-label="配置应用状态">
@@ -99,37 +95,25 @@ onMounted(refresh);
         <header>
           <div>
             <h2>运行实例</h2>
-            <UiDescription
-              >仅展示连接同一控制数据库且心跳未过期的服务进程。</UiDescription
-            >
+            <UiDescription>仅展示连接同一控制数据库且心跳未过期的服务进程。</UiDescription>
           </div>
           <span>{{ instances.length }}</span>
         </header>
         <div v-if="instances.length" class="instance-board">
           <article v-for="item in instances" :key="item.instance_id">
-            <span
-              class="instance-mark"
-              :class="item.status === 'ready' ? 'on' : 'off'"
-            >
-              {{
-                (item.hostname || item.instance_id).slice(0, 1).toUpperCase()
-              }}
+            <span class="instance-mark" :class="item.status === 'ready' ? 'on' : 'off'">
+              {{ (item.hostname || item.instance_id).slice(0, 1).toUpperCase() }}
             </span>
             <div>
               <strong>{{ item.hostname || item.instance_id }}</strong>
               <small
                 >PID {{ item.process_id }} ·
                 {{
-                  item.config_generation === status?.active_generation
-                    ? "配置已同步"
-                    : "配置待同步"
+                  item.config_generation === status?.active_generation ? "配置已同步" : "配置待同步"
                 }}</small
               >
             </div>
-            <span
-              class="status-word"
-              :class="item.status === 'ready' ? 'on' : 'off'"
-            >
+            <span class="status-word" :class="item.status === 'ready' ? 'on' : 'off'">
               {{ item.status === "ready" ? "就绪" : item.status }}
             </span>
           </article>
@@ -174,9 +158,7 @@ onMounted(refresh);
             <strong>{{ issue.label }}</strong>
             <p>{{ issue.message }}</p>
           </div>
-          <code v-if="issue.extra"
-            >pip install "meldfabric[{{ issue.extra }}]"</code
-          >
+          <code v-if="issue.extra">pip install "meldfabric[{{ issue.extra }}]"</code>
         </article>
       </div>
     </section>

@@ -5,9 +5,7 @@ import ModalFrame from "./ModalFrame.vue";
 const props = defineProps({ reports: { type: Object, default: () => ({}) } });
 defineEmits(["dismiss"]);
 const plane = ref("latest");
-const report = computed(
-  () => props.reports?.[plane.value] || { issues: [], counts: {} },
-);
+const report = computed(() => props.reports?.[plane.value] || { issues: [], counts: {} });
 const kindLabels = {
   tool: "工具",
   plugin: "插件",
@@ -54,9 +52,7 @@ function issueDetails(issue) {
     return "代码公开契约已经变化，当前运行视图将使用新的函数签名、Schema 或元数据。已有资源和挂载保持不变；如果配置字段也发生变化，会另行列出调整结果。";
   }
   if (issue.code === "CONFIG_INCOMPATIBLE") {
-    const location = details.edge_id
-      ? `编排边 ${details.edge_id} 的条件`
-      : "现有实例配置";
+    const location = details.edge_id ? `编排边 ${details.edge_id} 的条件` : "现有实例配置";
     return `${location} 无法通过当前代码声明的 Schema 校验，因此不会进入有效配置${details.edge_id ? "，该边已改为无条件通行" : "，相关挂载也已暂时移除"}。${details.validation_error ? ` 校验信息：${details.validation_error}` : ""}`;
   }
   const parts = [];
@@ -65,12 +61,9 @@ function issueDetails(issue) {
   const defaults = fieldList(details.defaulted_fields);
   const normalized = fieldList(details.normalized_fields);
   if (removedParameters)
-    parts.push(
-      `参数 ${removedParameters} 已不存在，对应的后台描述覆盖已移除。`,
-    );
+    parts.push(`参数 ${removedParameters} 已不存在，对应的后台描述覆盖已移除。`);
   if (removed) parts.push(`已移除当前 Schema 不再接受的字段：${removed}。`);
-  if (defaults)
-    parts.push(`已新增字段：${defaults}，并使用代码中声明的默认值。`);
+  if (defaults) parts.push(`已新增字段：${defaults}，并使用代码中声明的默认值。`);
   if (normalized) parts.push(`已按当前字段类型重新规范化：${normalized}。`);
   return parts.join(" ") || "配置已按照当前代码声明的 Schema 重新整理。";
 }
@@ -105,9 +98,7 @@ function issueDetails(issue) {
       >
         <header>
           <span>{{ issueTitle(issue) }}</span>
-          <code
-            >{{ issue.registration_kind }} · {{ issue.registration_id }}</code
-          >
+          <code>{{ issue.registration_kind }} · {{ issue.registration_id }}</code>
         </header>
         <p>{{ issueDetails(issue) }}</p>
         <section
@@ -116,8 +107,7 @@ function issueDetails(issue) {
           aria-label="受影响范围"
         >
           <header>
-            <strong>受影响范围</strong
-            ><span>{{ issue.effects.length }} 项</span>
+            <strong>受影响范围</strong><span>{{ issue.effects.length }} 项</span>
           </header>
           <div>
             <article
@@ -126,9 +116,7 @@ function issueDetails(issue) {
             >
               <span>{{ effectTypeLabels[effect.entity_type] }}</span>
               <strong>{{ effect.entity_name }}</strong>
-              <small>{{
-                relationLabels[effect.relation] || effect.relation
-              }}</small>
+              <small>{{ relationLabels[effect.relation] || effect.relation }}</small>
             </article>
           </div>
         </section>

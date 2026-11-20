@@ -23,8 +23,7 @@ function install(element, binding) {
   };
   state.contextmenu = (event) => open(event, "pointer");
   state.pointerdown = (event) => {
-    if (!["touch", "pen"].includes(event.pointerType) || event.button !== 0)
-      return;
+    if (!["touch", "pen"].includes(event.pointerType) || event.button !== 0) return;
     cancel();
     state.fired = false;
     state.startX = event.clientX;
@@ -35,10 +34,7 @@ function install(element, binding) {
     }, 520);
   };
   state.pointermove = (event) => {
-    if (
-      Math.hypot(event.clientX - state.startX, event.clientY - state.startY) > 8
-    )
-      cancel();
+    if (Math.hypot(event.clientX - state.startX, event.clientY - state.startY) > 8) cancel();
   };
   state.pointerend = cancel;
   state.click = (event) => {

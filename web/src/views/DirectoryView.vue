@@ -50,19 +50,16 @@ const descriptions = {
   tools: "只显示当前进程已导入的 @register.tool；模型看到的说明可在这里覆盖。",
   mcp_servers: "连接 Streamable HTTP MCP 服务，并把远程工具挂载给 Agent。",
   remote_agents: "发现其他 Agent 服务，并将其作为远程能力挂载给本地 Agent。",
-  skill_sources:
-    "相对路径以 state_dir 为根；目录下每个有效子目录对应一个 Skill。",
+  skill_sources: "相对路径以 state_dir 为根；目录下每个有效子目录对应一个 Skill。",
   plugins: "内置插件可直接配置；代码插件只有导入注册模块后才会出现。",
   hooks: "Hook 在指定生命周期执行；先由代码注册，再创建可挂载配置。",
-  interventions:
-    "Intervention 在工具或模型调用前后介入；人工确认需要可恢复会话。",
+  interventions: "Intervention 在工具或模型调用前后介入；人工确认需要可恢复会话。",
   graph_conditions: "条件由代码注册，参数保存在具体的 Graph 路径上。",
   sandbox_profiles: "为需要命令、代码或文件访问的工具提供隔离执行环境。",
   observability_providers: "将调用链路发送到 Langfuse；凭据会加密保存。",
 };
 const description = computed(
-  () =>
-    descriptions[props.type] || "创建可复用配置，并在 Agent 或编排中按需引用。",
+  () => descriptions[props.type] || "创建可复用配置，并在 Agent 或编排中按需引用。",
 );
 const source = computed(() => collection(props.type));
 const items = computed(() =>
@@ -72,8 +69,7 @@ const items = computed(() =>
       .includes(search.value.toLowerCase());
     return (
       matches &&
-      (status.value === "all" ||
-        (item.enabled !== false) === (status.value === "enabled"))
+      (status.value === "all" || (item.enabled !== false) === (status.value === "enabled"))
     );
   }),
 );
@@ -147,44 +143,32 @@ async function toggle(type, item, enabled) {
 function summary(item, type = props.type) {
   if (type === "agents")
     return (
-      state.config.resources.models.find((model) => model.id === item.model_ref)
-        ?.name || "尚未选择模型"
+      state.config.resources.models.find((model) => model.id === item.model_ref)?.name ||
+      "尚未选择模型"
     );
   if (type === "orchestrations") return orchestrationKinds[item.kind];
   if (type === "endpoints") {
-    const pool =
-      item.target_type === "agent"
-        ? state.config.agents
-        : state.config.orchestrations;
+    const pool = item.target_type === "agent" ? state.config.agents : state.config.orchestrations;
     const target = pool.find((entry) => entry.id === item.target_ref);
     return `${item.target_type === "agent" ? "Agent" : "编排"} · ${target?.name || "目标不可用"}`;
   }
   if (type === "model_providers") return item.base_url;
-  if (type === "models")
-    return `${valueLabel(item.protocol)} · ${item.model_name}`;
+  if (type === "models") return `${valueLabel(item.protocol)} · ${item.model_name}`;
   if (type === "databases") return valueLabel(item.engine);
-  if (type === "tools")
-    return item.description || item.python_path || "未填写模型可见描述";
+  if (type === "tools") return item.description || item.python_path || "未填写模型可见描述";
   if (type === "skill_sources") return item.path;
   if (
     type === "hooks" ||
-    ((type === "plugins" || type === "interventions") &&
-      item.kind === "registered")
+    ((type === "plugins" || type === "interventions") && item.kind === "registered")
   ) {
-    const kind =
-      type === "plugins"
-        ? "plugin"
-        : type === "hooks"
-          ? "hook"
-          : "intervention";
+    const kind = type === "plugins" ? "plugin" : type === "hooks" ? "hook" : "intervention";
     return (
       (state.features?.code_registrations?.[kind] || []).find(
         (definition) => definition.id === item.registration_id,
       )?.name || item.registration_id
     );
   }
-  if (type === "plugins" || type === "interventions")
-    return valueLabel(item.kind);
+  if (type === "plugins" || type === "interventions") return valueLabel(item.kind);
   if (type === "sandbox_profiles") return item.provider;
   return item.url || item.base_url || item.host || item.description || "已配置";
 }
@@ -200,13 +184,8 @@ function summary(item, type = props.type) {
       </div>
       <div class="heading-actions">
         <template v-if="isModels">
-          <UiButton variant="secondary" @click="create('model_providers')"
-            >添加服务商</UiButton
-          >
-          <UiButton
-            variant="primary"
-            :disabled="!providers.length"
-            @click="create('models')"
+          <UiButton variant="secondary" @click="create('model_providers')">添加服务商</UiButton>
+          <UiButton variant="primary" :disabled="!providers.length" @click="create('models')"
             >注册模型</UiButton
           >
         </template>
@@ -223,9 +202,7 @@ function summary(item, type = props.type) {
       <header>
         <div>
           <h2>内置插件</h2>
-          <UiDescription
-            >无需代码注册，创建配置后即可挂载到 Agent。</UiDescription
-          >
+          <UiDescription>无需代码注册，创建配置后即可挂载到 Agent。</UiDescription>
         </div>
       </header>
       <div class="template-grid">
@@ -283,11 +260,7 @@ function summary(item, type = props.type) {
         </header>
         <div v-if="providers.length" class="entity-list">
           <article v-for="item in providers" :key="item.id" class="entity-row">
-            <button
-              type="button"
-              class="entity-open"
-              @click="open('model_providers', item.id)"
-            >
+            <button type="button" class="entity-open" @click="open('model_providers', item.id)">
               <span class="entity-symbol">P</span
               ><span class="entity-main"
                 ><strong>{{ item.display_name || item.name }}</strong
@@ -295,16 +268,12 @@ function summary(item, type = props.type) {
               >
               <span class="entity-meta"
                 >{{
-                  state.config.resources.models.filter(
-                    (m) => m.provider_ref === item.id,
-                  ).length
+                  state.config.resources.models.filter((m) => m.provider_ref === item.id).length
                 }}
                 个模型</span
               >
             </button>
-            <span class="entity-status">{{
-              item.enabled === false ? "已禁用" : "已启用"
-            }}</span>
+            <span class="entity-status">{{ item.enabled === false ? "已禁用" : "已启用" }}</span>
             <ToggleSwitch
               :model-value="item.enabled !== false"
               :disabled="Boolean(toggling) || state.saving"
@@ -313,9 +282,7 @@ function summary(item, type = props.type) {
             />
           </article>
         </div>
-        <p v-else class="empty-state">
-          还没有模型服务商。先添加连接，再从服务商发现模型。
-        </p>
+        <p v-else class="empty-state">还没有模型服务商。先添加连接，再从服务商发现模型。</p>
       </section>
       <section class="directory-section">
         <header>
@@ -327,20 +294,14 @@ function summary(item, type = props.type) {
         </header>
         <div v-if="source.length" class="entity-list">
           <article v-for="item in source" :key="item.id" class="entity-row">
-            <button
-              type="button"
-              class="entity-open"
-              @click="open('models', item.id)"
-            >
+            <button type="button" class="entity-open" @click="open('models', item.id)">
               <span class="entity-symbol">M</span
               ><span class="entity-main"
                 ><strong>{{ item.display_name || item.name }}</strong
                 ><small>{{ summary(item) }}</small></span
               >
             </button>
-            <span class="entity-status">{{
-              item.enabled === false ? "已禁用" : "已启用"
-            }}</span>
+            <span class="entity-status">{{ item.enabled === false ? "已禁用" : "已启用" }}</span>
             <ToggleSwitch
               :model-value="item.enabled !== false"
               :disabled="Boolean(toggling) || state.saving"
@@ -360,9 +321,7 @@ function summary(item, type = props.type) {
       >
         <div>
           <h2>配置实例</h2>
-          <UiDescription
-            >这里的实例可以独立启停，并复用到不同 Agent。</UiDescription
-          >
+          <UiDescription>这里的实例可以独立启停，并复用到不同 Agent。</UiDescription>
         </div>
         <span>{{ source.length }}</span>
       </header>
@@ -387,11 +346,7 @@ function summary(item, type = props.type) {
       </div>
       <div v-if="items.length" class="entity-list">
         <article v-for="item in items" :key="item.id" class="entity-row">
-          <button
-            type="button"
-            class="entity-open"
-            @click="open(type, item.id)"
-          >
+          <button type="button" class="entity-open" @click="open(type, item.id)">
             <span class="entity-symbol">{{
               (item.display_name || item.name || "?").slice(0, 1).toUpperCase()
             }}</span>
@@ -400,9 +355,7 @@ function summary(item, type = props.type) {
               ><small>{{ summary(item) }}</small></span
             >
           </button>
-          <span class="entity-status">{{
-            item.enabled === false ? "已禁用" : "已启用"
-          }}</span>
+          <span class="entity-status">{{ item.enabled === false ? "已禁用" : "已启用" }}</span>
           <ToggleSwitch
             :model-value="item.enabled !== false"
             :disabled="Boolean(toggling) || state.saving"
@@ -414,11 +367,7 @@ function summary(item, type = props.type) {
       <div v-else class="empty-state large">
         <strong>暂无{{ title }}</strong>
         <p>
-          {{
-            search
-              ? "没有匹配当前筛选条件的项目。"
-              : "创建第一个配置后会显示在这里。"
-          }}
+          {{ search ? "没有匹配当前筛选条件的项目。" : "创建第一个配置后会显示在这里。" }}
         </p>
       </div>
     </template>

@@ -21,8 +21,7 @@ function changed() {
 
 function add() {
   let index = prompt.value.versions.length + 1;
-  while (prompt.value.versions.some((item) => item.version === `v${index}`))
-    index += 1;
+  while (prompt.value.versions.some((item) => item.version === `v${index}`)) index += 1;
   prompt.value.versions.push({
     version: `v${index}`,
     content: version.value?.content || "",
@@ -52,8 +51,7 @@ async function remove() {
 function rename(value) {
   const previous = version.value.version;
   version.value.version = value;
-  if (prompt.value.selected_version === previous)
-    prompt.value.selected_version = value;
+  if (prompt.value.selected_version === previous) prompt.value.selected_version = value;
   changed();
 }
 
@@ -66,9 +64,7 @@ function insert(variable) {
 <template>
   <div class="prompt-editor split-editor">
     <aside class="split-index">
-      <UiButton variant="secondary" class="wide" @click="add"
-        >新增版本</UiButton
-      >
+      <UiButton variant="secondary" class="wide" @click="add">新增版本</UiButton>
       <button
         v-for="(item, index) in prompt.versions"
         :key="index"
@@ -108,11 +104,7 @@ function insert(variable) {
           <button type="button" @click="insert('time.timezone')">时区</button>
         </div>
         <div class="button-row">
-          <UiButton
-            variant="danger"
-            :disabled="prompt.versions.length === 1"
-            @click="remove"
-          >
+          <UiButton variant="danger" :disabled="prompt.versions.length === 1" @click="remove">
             删除版本
           </UiButton>
           <UiButton
@@ -123,11 +115,7 @@ function insert(variable) {
               changed();
             "
           >
-            {{
-              version.version === prompt.selected_version
-                ? "当前使用"
-                : "使用此版本"
-            }}
+            {{ version.version === prompt.selected_version ? "当前使用" : "使用此版本" }}
           </UiButton>
         </div>
       </footer>

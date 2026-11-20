@@ -93,9 +93,7 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 26px 32px;
 }
-.structured-object.root
-  > .structured-object-fields
-  > :is(.structured-object, .structured-array) {
+.structured-object.root > .structured-object-fields > :is(.structured-object, .structured-array) {
   grid-column: 1 / -1;
 }
 .structured-field-row:not(.root),

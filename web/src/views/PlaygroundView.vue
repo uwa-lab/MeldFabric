@@ -48,9 +48,7 @@ const selectedEndpointItem = computed(() =>
   endpoints.value.find((item) => item.id === selectedEndpoint.value),
 );
 const canCreate = computed(
-  () =>
-    selectedEndpointItem.value?.latest_enabled &&
-    selectedEndpointItem.value?.runnable,
+  () => selectedEndpointItem.value?.latest_enabled && selectedEndpointItem.value?.runnable,
 );
 const pendingInterrupt = computed(() => {
   for (let index = messages.value.length - 1; index >= 0; index -= 1) {
@@ -75,9 +73,7 @@ const canSend = computed(
     !pendingInterrupt.value &&
     !running.value,
 );
-const workspaceName = computed(
-  () => state.config?.workspace?.name || "工作空间",
-);
+const workspaceName = computed(() => state.config?.workspace?.name || "工作空间");
 
 function displayName(endpoint) {
   return endpoint?.display_name || endpoint?.name || "未知端点";
@@ -88,9 +84,7 @@ function formatTime(value, detailed = false) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "";
   return new Intl.DateTimeFormat("zh-CN", {
-    ...(detailed
-      ? { month: "2-digit", day: "2-digit" }
-      : { hour: "2-digit", minute: "2-digit" }),
+    ...(detailed ? { month: "2-digit", day: "2-digit" } : { hour: "2-digit", minute: "2-digit" }),
     ...(detailed ? { hour: "2-digit", minute: "2-digit" } : {}),
   }).format(date);
 }
@@ -153,8 +147,7 @@ async function appendStreamingText(message, delta) {
     if (controller?.signal.aborted) return;
     message.content += units.slice(index, index + chunkSize).join("");
     await nextTick();
-    if (messagePane.value)
-      messagePane.value.scrollTop = messagePane.value.scrollHeight;
+    if (messagePane.value) messagePane.value.scrollTop = messagePane.value.scrollHeight;
     await nextPaint();
   }
 }
@@ -177,9 +170,7 @@ async function loadConversation(id, { silent = false } = {}) {
   }
   if (!silent) loadingConversation.value = true;
   try {
-    const detail = await api(
-      `/admin/playground/conversations/${encodeURIComponent(id)}`,
-    );
+    const detail = await api(`/admin/playground/conversations/${encodeURIComponent(id)}`);
     current.value = detail.conversation;
     messages.value = detail.messages || [];
     streamingMessageId.value = "";
@@ -199,8 +190,7 @@ async function loadConversation(id, { silent = false } = {}) {
 
 function openNewConversation() {
   selectedEndpoint.value =
-    endpoints.value.find((item) => item.latest_enabled && item.runnable)?.id ||
-    "";
+    endpoints.value.find((item) => item.latest_enabled && item.runnable)?.id || "";
   endpointDialog.value = true;
 }
 
@@ -249,8 +239,7 @@ async function acceptEvent(event) {
     return;
   }
   if (event.type === "TEXT_MESSAGE_END") {
-    if (streamingMessageId.value === event.messageId)
-      streamingMessageId.value = "";
+    if (streamingMessageId.value === event.messageId) streamingMessageId.value = "";
     return;
   }
   if (event.type === "TOOL_CALL_START") {
@@ -274,23 +263,17 @@ async function acceptEvent(event) {
     return;
   }
   if (event.type === "TOOL_CALL_ARGS") {
-    const tool = messages.value.find(
-      (item) => item.payload?.tool_call_id === event.toolCallId,
-    );
+    const tool = messages.value.find((item) => item.payload?.tool_call_id === event.toolCallId);
     if (tool) tool.payload.arguments += event.delta || "";
     return;
   }
   if (event.type === "TOOL_CALL_END") {
-    const tool = messages.value.find(
-      (item) => item.payload?.tool_call_id === event.toolCallId,
-    );
+    const tool = messages.value.find((item) => item.payload?.tool_call_id === event.toolCallId);
     if (tool) tool.payload.status = "completed";
     return;
   }
   if (event.type === "TOOL_CALL_RESULT") {
-    const tool = messages.value.find(
-      (item) => item.payload?.tool_call_id === event.toolCallId,
-    );
+    const tool = messages.value.find((item) => item.payload?.tool_call_id === event.toolCallId);
     if (tool) {
       tool.content = event.content || "";
       tool.payload.result = event.content || "";
@@ -451,10 +434,9 @@ async function removeConversation() {
   if (!confirmed) return;
   deleting.value = true;
   try {
-    await api(
-      `/admin/playground/conversations/${encodeURIComponent(current.value.id)}`,
-      { method: "DELETE" },
-    );
+    await api(`/admin/playground/conversations/${encodeURIComponent(current.value.id)}`, {
+      method: "DELETE",
+    });
     await router.replace("/playground");
     current.value = null;
     messages.value = [];
@@ -525,22 +507,15 @@ onUnmounted(() => controller?.abort());
               <time>{{ formatTime(item.updated_at, true) }}</time>
             </small>
           </RouterLink>
-          <div
-            v-if="!loading && !filteredConversations.length"
-            class="history-empty"
-          >
+          <div v-if="!loading && !filteredConversations.length" class="history-empty">
             <span>暂无会话</span>
-            <small>{{
-              query ? "没有匹配结果" : "选择端点开始第一次对话"
-            }}</small>
+            <small>{{ query ? "没有匹配结果" : "选择端点开始第一次对话" }}</small>
           </div>
         </nav>
       </aside>
 
       <section class="resource-outlet playground-chat">
-        <div v-if="loading || loadingConversation" class="chat-loading">
-          正在读取会话…
-        </div>
+        <div v-if="loading || loadingConversation" class="chat-loading">正在读取会话…</div>
         <template v-else-if="current">
           <header class="chat-header">
             <div>
@@ -572,8 +547,7 @@ onUnmounted(() => controller?.abort());
               }}</span>
               <h2>开始测试 {{ current.endpoint_name }}</h2>
               <UiDescription>
-                调试台单独保存消息用于展示与续聊；Agent
-                仍按自身配置维护会话上下文与长期记忆。
+                调试台单独保存消息用于展示与续聊；Agent 仍按自身配置维护会话上下文与长期记忆。
               </UiDescription>
             </div>
 
@@ -584,23 +558,17 @@ onUnmounted(() => controller?.abort());
               :class="[message.kind, message.role]"
             >
               <template v-if="message.kind === 'message'">
-                <span class="speaker-mark">{{
-                  message.role === "user" ? "你" : "AI"
-                }}</span>
+                <span class="speaker-mark">{{ message.role === "user" ? "你" : "AI" }}</span>
                 <div class="message-copy">
                   <header>
                     <strong>{{
-                      message.role === "user"
-                        ? workspaceName
-                        : current.endpoint_name
+                      message.role === "user" ? workspaceName : current.endpoint_name
                     }}</strong>
                     <time>{{ formatTime(message.created_at) }}</time>
                   </header>
                   <p
                     :class="{
-                      streaming:
-                        message.role === 'assistant' &&
-                        streamingMessageId === message.id,
+                      streaming: message.role === 'assistant' && streamingMessageId === message.id,
                     }"
                   >
                     {{ message.content || (running ? "正在生成…" : "") }}
@@ -612,9 +580,7 @@ onUnmounted(() => controller?.abort());
                 <summary>
                   <span class="tool-state-dot" />
                   <strong>{{ message.payload?.name || "工具调用" }}</strong>
-                  <small>{{
-                    message.payload?.status === "running" ? "执行中" : "已完成"
-                  }}</small>
+                  <small>{{ message.payload?.status === "running" ? "执行中" : "已完成" }}</small>
                 </summary>
                 <div>
                   <section v-if="message.payload?.arguments">
@@ -639,17 +605,9 @@ onUnmounted(() => controller?.abort());
                         : "运行状态"
                 }}</strong>
                 <span>{{ message.content }}</span>
-                <code v-if="message.payload?.code">{{
-                  message.payload.code
-                }}</code>
-                <div
-                  v-if="pendingInterrupt?.id === message.id"
-                  class="interrupt-actions"
-                >
-                  <div
-                    v-if="interruptOptions(message).length"
-                    class="interrupt-options"
-                  >
+                <code v-if="message.payload?.code">{{ message.payload.code }}</code>
+                <div v-if="pendingInterrupt?.id === message.id" class="interrupt-actions">
+                  <div v-if="interruptOptions(message).length" class="interrupt-options">
                     <UiButton
                       v-for="option in interruptOptions(message)"
                       :key="option"
@@ -676,11 +634,7 @@ onUnmounted(() => controller?.abort());
                       继续
                     </UiButton>
                   </div>
-                  <UiButton
-                    variant="danger"
-                    :disabled="running"
-                    @click="abandonInterrupt"
-                  >
+                  <UiButton variant="danger" :disabled="running" @click="abandonInterrupt">
                     结束等待
                   </UiButton>
                 </div>
@@ -727,16 +681,8 @@ onUnmounted(() => controller?.abort());
                 @compositionend="composingDraft = false"
                 @keydown="handleComposerKeydown"
               />
-              <UiButton v-if="running" variant="secondary" @click="stop"
-                >停止</UiButton
-              >
-              <UiButton
-                v-else
-                variant="primary"
-                :disabled="!canSend"
-                @click="send"
-                >发送</UiButton
-              >
+              <UiButton v-if="running" variant="secondary" @click="stop">停止</UiButton>
+              <UiButton v-else variant="primary" :disabled="!canSend" @click="send">发送</UiButton>
             </div>
           </footer>
         </template>
@@ -747,9 +693,7 @@ onUnmounted(() => controller?.abort());
           <UiDescription>
             新建会话时选择一个已应用端点。每条历史会话都可以重新打开并继续交流。
           </UiDescription>
-          <UiButton variant="primary" @click="openNewConversation"
-            >选择端点</UiButton
-          >
+          <UiButton variant="primary" @click="openNewConversation">选择端点</UiButton>
         </div>
       </section>
     </div>
@@ -773,18 +717,13 @@ onUnmounted(() => controller?.abort());
             displayName(endpoint).slice(0, 1).toUpperCase()
           }}</span>
           <span>
-            <strong :title="displayName(endpoint)">{{
-              displayName(endpoint)
-            }}</strong>
+            <strong :title="displayName(endpoint)">{{ displayName(endpoint) }}</strong>
             <small>{{
-              endpoint.description ||
-              `${endpoint.target_type === "agent" ? "Agent" : "编排"} 端点`
+              endpoint.description || `${endpoint.target_type === "agent" ? "Agent" : "编排"} 端点`
             }}</small>
           </span>
           <em v-if="!endpoint.exists_in_runtime">尚未应用</em>
-          <em v-else-if="!endpoint.latest_enabled || !endpoint.runtime_enabled"
-            >已禁用</em
-          >
+          <em v-else-if="!endpoint.latest_enabled || !endpoint.runtime_enabled">已禁用</em>
           <em v-else-if="endpoint.configuration_changed">使用运行版本</em>
           <em v-else class="ready">可用</em>
         </button>
@@ -794,9 +733,7 @@ onUnmounted(() => controller?.abort());
         </div>
       </div>
       <template #footer>
-        <UiButton variant="ghost" @click="endpointDialog = false"
-          >取消</UiButton
-        >
+        <UiButton variant="ghost" @click="endpointDialog = false">取消</UiButton>
         <UiButton
           variant="primary"
           :busy="creating"

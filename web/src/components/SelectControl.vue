@@ -1,13 +1,5 @@
 <script setup>
-import {
-  computed,
-  nextTick,
-  onBeforeUnmount,
-  onMounted,
-  ref,
-  useAttrs,
-  useId,
-} from "vue";
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, useAttrs, useId } from "vue";
 
 defineOptions({ inheritAttrs: false });
 const props = defineProps({
@@ -31,11 +23,7 @@ const props = defineProps({
   attrs = useAttrs(),
   rootClass = computed(() => attrs.class),
   triggerAttrs = computed(() =>
-    Object.fromEntries(
-      Object.entries(attrs).filter(
-        ([key]) => !["class", "style"].includes(key),
-      ),
-    ),
+    Object.fromEntries(Object.entries(attrs).filter(([key]) => !["class", "style"].includes(key))),
   ),
   controlId = computed(() => props.inputId || `select-${generatedId}`),
   listId = computed(() => `${controlId.value}-listbox`),
@@ -46,9 +34,7 @@ const props = defineProps({
   label = computed(() => selected.value?.label || props.placeholder);
 
 function enabled(index) {
-  return (
-    index >= 0 && index < props.options.length && !props.options[index].disabled
-  );
+  return index >= 0 && index < props.options.length && !props.options[index].disabled;
 }
 function nextEnabled(start, direction) {
   if (!props.options.length) return -1;
@@ -75,10 +61,7 @@ function place() {
     above = rect.top - margin - gap,
     useAbove = below < 180 && above > below,
     width = Math.min(Math.max(rect.width, 180), viewportWidth - margin * 2),
-    left = Math.max(
-      margin,
-      Math.min(rect.left, viewportWidth - width - margin),
-    );
+    left = Math.max(margin, Math.min(rect.left, viewportWidth - width - margin));
   if (rect.bottom < 0 || rect.top > viewportHeight) {
     hide();
     return;
@@ -155,11 +138,7 @@ function keydown(event) {
   if (event.key === "Tab") hide();
 }
 function outside(event) {
-  if (
-    !root.value?.contains(event.target) &&
-    !menu.value?.contains(event.target)
-  )
-    hide();
+  if (!root.value?.contains(event.target) && !menu.value?.contains(event.target)) hide();
 }
 function escape(event) {
   if (event.key === "Escape" && open.value) {
@@ -181,11 +160,7 @@ onBeforeUnmount(() => {
 });
 </script>
 <template>
-  <div
-    ref="root"
-    class="select-control"
-    :class="[rootClass, { open, disabled }]"
-  >
+  <div ref="root" class="select-control" :class="[rootClass, { open, disabled }]">
     <button
       v-bind="triggerAttrs"
       :id="controlId"
@@ -228,9 +203,7 @@ onBeforeUnmount(() => {
         class="select-menu"
         role="listbox"
         :aria-label="ariaLabel"
-        :aria-activedescendant="
-          active >= 0 ? `${controlId}-option-${active}` : undefined
-        "
+        :aria-activedescendant="active >= 0 ? `${controlId}-option-${active}` : undefined"
       >
         <button
           v-for="(item, index) in options"
@@ -255,11 +228,7 @@ onBeforeUnmount(() => {
             <small>{{ item.description }}</small>
           </span>
           <span v-else>{{ item.label }}</span>
-          <svg
-            v-if="index === selectedIndex"
-            viewBox="0 0 16 16"
-            aria-hidden="true"
-          >
+          <svg v-if="index === selectedIndex" viewBox="0 0 16 16" aria-hidden="true">
             <path d="m3 8 3 3 7-7" />
           </svg>
         </button>

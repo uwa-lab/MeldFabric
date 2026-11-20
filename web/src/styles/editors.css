@@ -329,10 +329,7 @@
 .remote-binding-settings > article {
   min-height: 62px;
   display: grid;
-  grid-template-columns: minmax(160px, 1fr) minmax(210px, 0.8fr) minmax(
-      210px,
-      0.8fr
-    );
+  grid-template-columns: minmax(160px, 1fr) minmax(210px, 0.8fr) minmax(210px, 0.8fr);
   align-items: center;
   gap: 12px;
   padding: 10px 0;

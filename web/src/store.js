@@ -23,8 +23,7 @@ const notificationTimers = new Map();
 export function notify(message, bad = false) {
   const id = crypto.randomUUID();
   state.notifications.push({ id, message, bad });
-  while (state.notifications.length > 5)
-    dismissNotification(state.notifications[0].id);
+  while (state.notifications.length > 5) dismissNotification(state.notifications[0].id);
   notificationTimers.set(
     id,
     setTimeout(() => dismissNotification(id), 8000),
@@ -52,25 +51,18 @@ export function setEditorDirty(value) {
 export async function load(key = credentials.get()) {
   state.loading = true;
   try {
-    const [
-      config,
-      schema,
-      features,
-      configStatus,
-      reconciliation,
-      overview,
-      tools,
-    ] = await Promise.all(
-      [
-        "/admin/config",
-        "/admin/config-schema",
-        "/admin/runtime/capabilities",
-        "/admin/runtime/config-status",
-        "/admin/runtime/reconciliation",
-        "/admin/overview",
-        "/admin/resources/tools",
-      ].map((path) => api(path, { key })),
-    );
+    const [config, schema, features, configStatus, reconciliation, overview, tools] =
+      await Promise.all(
+        [
+          "/admin/config",
+          "/admin/config-schema",
+          "/admin/runtime/capabilities",
+          "/admin/runtime/config-status",
+          "/admin/runtime/reconciliation",
+          "/admin/overview",
+          "/admin/resources/tools",
+        ].map((path) => api(path, { key })),
+      );
     Object.assign(state, {
       config,
       schema,
@@ -147,17 +139,14 @@ export async function saveTool(id, patch) {
   if (state.saving) return null;
   state.saving = true;
   try {
-    const result = await api(
-      `/admin/resources/tools/${encodeURIComponent(id)}`,
-      {
-        method: "PATCH",
-        body: JSON.stringify({
-          ...patch,
-          expected_generation: state.config.config_generation,
-          expected_catalog_digest: state.features.code_catalog_digest,
-        }),
-      },
-    );
+    const result = await api(`/admin/resources/tools/${encodeURIComponent(id)}`, {
+      method: "PATCH",
+      body: JSON.stringify({
+        ...patch,
+        expected_generation: state.config.config_generation,
+        expected_catalog_digest: state.features.code_catalog_digest,
+      }),
+    });
     await load();
     notify("工具配置已保存");
     return result;

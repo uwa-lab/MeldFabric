@@ -26,9 +26,7 @@ function commit(value) {
 }
 
 function adjust(direction) {
-  const current = Number.isFinite(props.modelValue)
-    ? props.modelValue
-    : (props.minimum ?? 0);
+  const current = Number.isFinite(props.modelValue) ? props.modelValue : (props.minimum ?? 0);
   commit(current + increment.value * direction);
 }
 </script>

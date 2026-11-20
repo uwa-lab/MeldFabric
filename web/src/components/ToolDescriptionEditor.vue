@@ -1,29 +1,27 @@
 <script setup>
 import { computed } from "vue";
 
-const props = defineProps({ draft: { type: Object, required: true } });
+const draft = defineModel("draft", { type: Object, required: true });
 
-const parameters = computed(() => props.draft.parameters || []);
+const parameters = computed(() => draft.value.parameters || []);
 
 function setToolDescription(value) {
-  props.draft.description = value;
-  props.draft.description_overridden =
-    value !== (props.draft.description_default || "");
+  draft.value.description = value;
+  draft.value.description_overridden = value !== (draft.value.description_default || "");
 }
 
 function resetToolDescription() {
-  props.draft.description = props.draft.description_default || "";
-  props.draft.description_overridden = false;
+  draft.value.description = draft.value.description_default || "";
+  draft.value.description_overridden = false;
 }
 
 function setParameter(parameter, value) {
   parameter.description = value;
-  parameter.description_overridden =
-    value !== (parameter.description_default || "");
-  const overrides = { ...(props.draft.parameter_descriptions || {}) };
+  parameter.description_overridden = value !== (parameter.description_default || "");
+  const overrides = { ...(draft.value.parameter_descriptions || {}) };
   if (parameter.description_overridden) overrides[parameter.name] = value;
   else delete overrides[parameter.name];
-  props.draft.parameter_descriptions = overrides;
+  draft.value.parameter_descriptions = overrides;
 }
 
 function resetParameter(parameter) {
@@ -31,8 +29,7 @@ function resetParameter(parameter) {
 }
 
 function fieldType(schema = {}) {
-  if (Array.isArray(schema.type))
-    return schema.type.filter((item) => item !== "null").join(" / ");
+  if (Array.isArray(schema.type)) return schema.type.filter((item) => item !== "null").join(" / ");
   if (schema.enum) return "enum";
   return schema.type || "any";
 }
@@ -65,10 +62,7 @@ function fieldType(schema = {}) {
       <header>
         <div>
           <h3>参数说明</h3>
-          <UiDescription
-            >参数结构来自函数签名，描述会写入模型看到的工具
-            Schema。</UiDescription
-          >
+          <UiDescription>参数结构来自函数签名，描述会写入模型看到的工具 Schema。</UiDescription>
         </div>
         <span>{{ parameters.length }} 个参数</span>
       </header>

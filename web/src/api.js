@@ -1,19 +1,14 @@
-const meta = (name) =>
-  document.querySelector(`meta[name="${name}"]`)?.content || "";
+const meta = (name) => document.querySelector(`meta[name="${name}"]`)?.content || "";
 export const adminBase = meta("meldfabric-admin-base");
 export const rootPath = meta("meldfabric-root-path");
 const storageKey = `meldfabric_admin_key:${adminBase}`;
 export const credentials = {
   get: () => sessionStorage.getItem(storageKey) || "",
   set: (value) =>
-    value
-      ? sessionStorage.setItem(storageKey, value)
-      : sessionStorage.removeItem(storageKey),
+    value ? sessionStorage.setItem(storageKey, value) : sessionStorage.removeItem(storageKey),
 };
 const resolvePath = (path) =>
-  path === "/admin" || path.startsWith("/admin/")
-    ? adminBase + path.slice(6)
-    : rootPath + path;
+  path === "/admin" || path.startsWith("/admin/") ? adminBase + path.slice(6) : rootPath + path;
 export function errorMessage(body) {
   const error = body?.error || body?.detail;
   return (
@@ -47,8 +42,7 @@ export async function api(path, options = {}) {
     const error = new Error(errorMessage(body));
     error.status = response.status;
     error.body = body;
-    if (response.status === 401)
-      window.dispatchEvent(new Event("meldfabric:unauthorized"));
+    if (response.status === 401) window.dispatchEvent(new Event("meldfabric:unauthorized"));
     throw error;
   }
   return body;
@@ -78,8 +72,7 @@ export async function streamSSE(path, body, { signal, onEvent, onOpen } = {}) {
     const error = new Error(errorMessage(payload));
     error.status = response.status;
     error.body = payload;
-    if (response.status === 401)
-      window.dispatchEvent(new Event("meldfabric:unauthorized"));
+    if (response.status === 401) window.dispatchEvent(new Event("meldfabric:unauthorized"));
     throw error;
   }
   onOpen?.({

@@ -1,25 +1,64 @@
+default_stages: [pre-commit]
+
 repos:
-  - repo: local
+  - repo: https://github.com/pre-commit/pre-commit-hooks.git
+    rev: v6.0.0
+    hooks:
+      - id: check-added-large-files
+        args: ["--maxkb=1024"]
+      - id: check-case-conflict
+      - id: check-json
+      - id: check-merge-conflict
+      - id: check-toml
+      - id: check-yaml
+        args: ["--unsafe"]
+      - id: debug-statements
+      - id: detect-private-key
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.17.3
     hooks:
       - id: ruff-check
-        name: Ruff lint
-        entry: uv run ruff check
-        language: system
-        types: [python]
+        args: ["--fix", "--exit-non-zero-on-fix"]
       - id: ruff-format
-        name: Ruff format
-        entry: uv run ruff format --check
-        language: system
-        types: [python]
+  - repo: https://github.com/codespell-project/codespell.git
+    rev: v2.4.2
+    hooks:
+      - id: codespell
+        files: "\\.(py|md|toml|yaml|yml)$"
+  - repo: https://github.com/hukkin/mdformat
+    rev: 1.0.0
+    hooks:
+      - id: mdformat
+        additional_dependencies: [mdformat-gfm]
+  - repo: https://github.com/ComPWA/taplo-pre-commit
+    rev: v0.9.3
+    hooks:
+      - id: taplo-format
+  - repo: local
+    hooks:
       - id: mypy
         name: Mypy
         entry: uv run mypy
         language: system
         pass_filenames: false
         types: [python]
-      - id: frontend-check
-        name: Frontend checks
-        entry: npm --prefix web run check
+      - id: frontend-eslint
+        name: Frontend ESLint
+        entry: npm --prefix web run lint -- --fix
+        language: system
+        pass_filenames: false
+        files: ^web/.*\.(js|mjs|vue)$
+      - id: frontend-prettier
+        name: Frontend Prettier
+        entry: npm --prefix web run format
+        language: system
+        pass_filenames: false
+        files: ^(web/|\.github/workflows/)
+      - id: frontend-design
+        name: Frontend design checks
+        entry: node web/scripts/check-design.mjs
         language: system
         pass_filenames: false
         files: ^web/

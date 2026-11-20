@@ -38,9 +38,7 @@ function memberLabel(item) {
   const details = [
     ...new Set(
       members.flatMap((member) =>
-        member.kind === "tool"
-          ? [member.name].filter(Boolean)
-          : member.events || [],
+        member.kind === "tool" ? [member.name].filter(Boolean) : member.events || [],
       ),
     ),
   ];
@@ -71,11 +69,7 @@ function memberLabel(item) {
             <small v-if="item.members?.length">{{ memberLabel(item) }}</small>
           </footer>
         </div>
-        <UiButton
-          v-if="actionable"
-          variant="secondary"
-          @click="$emit('create', item)"
-        >
+        <UiButton v-if="actionable" variant="secondary" @click="$emit('create', item)">
           {{ actionLabel }}
         </UiButton>
         <span v-else class="code-catalog-usage">{{ usageLabel }}</span>

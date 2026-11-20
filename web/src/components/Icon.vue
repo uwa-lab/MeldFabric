@@ -4,10 +4,8 @@ const paths = {
   search: "M10.5 3a7.5 7.5 0 1 0 0 15 7.5 7.5 0 0 0 0-15 M16 16l5 5",
   menu: "M4 6h16 M4 12h16 M4 18h16",
   overview: "M3 3h7v7H3z M14 3h7v7h-7z M3 14h7v7H3z M14 14h7v7h-7z",
-  agents:
-    "M12 3v3 M8 3h8 M5 6h14a2 2 0 0 1 2 2v11H3V8a2 2 0 0 1 2-2 M8 11v2 M16 11v2 M8 16h8",
-  orchestrations:
-    "M4 5h5v5H4z M15 4h5v5h-5z M10 15h5v5h-5z M9 7h6 M17 9v3l-4 3 M7 10v3l4 2",
+  agents: "M12 3v3 M8 3h8 M5 6h14a2 2 0 0 1 2 2v11H3V8a2 2 0 0 1 2-2 M8 11v2 M16 11v2 M8 16h8",
+  orchestrations: "M4 5h5v5H4z M15 4h5v5h-5z M10 15h5v5h-5z M9 7h6 M17 9v3l-4 3 M7 10v3l4 2",
   endpoints: "M4 12h12 M12 7l5 5-5 5 M4 5v14 M20 5v14",
   playground: "M4 5h16v12H8l-4 4z M8 9h8 M8 13h5",
   resources: "m12 3 9 5-9 5-9-5z M3 12l9 5 9-5 M3 16l9 5 9-5",

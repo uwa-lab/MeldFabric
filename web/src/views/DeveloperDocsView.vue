@@ -60,15 +60,9 @@ const requestContextFields = [
   "trace_attributes",
 ];
 const hookEvents = [
-  [
-    "Agent",
-    "AgentInitializedEvent · BeforeInvocationEvent · AfterInvocationEvent",
-  ],
+  ["Agent", "AgentInitializedEvent · BeforeInvocationEvent · AfterInvocationEvent"],
   ["Model", "BeforeModelCallEvent · AfterModelCallEvent"],
-  [
-    "Tool",
-    "BeforeToolsEvent · BeforeToolCallEvent · AfterToolCallEvent · AfterToolsEvent",
-  ],
+  ["Tool", "BeforeToolsEvent · BeforeToolCallEvent · AfterToolCallEvent · AfterToolsEvent"],
   ["Message", "MessageAddedEvent · MessageUpdatedEvent"],
   [
     "Multi-agent",
@@ -139,22 +133,10 @@ const interventionActions = [
               </article>
             </div>
             <ol class="docs-registration-path">
-              <li>
-                <span>1</span><strong>定义函数</strong
-                ><small>写完整类型标注</small>
-              </li>
-              <li>
-                <span>2</span><strong>添加装饰器</strong
-                ><small>模块导入时登记</small>
-              </li>
-              <li>
-                <span>3</span><strong>导入模块</strong
-                ><small>启动路径必须执行 import</small>
-              </li>
-              <li>
-                <span>4</span><strong>后台挂载</strong
-                ><small>配置描述并绑定 Agent</small>
-              </li>
+              <li><span>1</span><strong>定义函数</strong><small>写完整类型标注</small></li>
+              <li><span>2</span><strong>添加装饰器</strong><small>模块导入时登记</small></li>
+              <li><span>3</span><strong>导入模块</strong><small>启动路径必须执行 import</small></li>
+              <li><span>4</span><strong>后台挂载</strong><small>配置描述并绑定 Agent</small></li>
             </ol>
           </section>
 
@@ -163,10 +145,7 @@ const interventionActions = [
               <span>2</span>
               <div>
                 <h3>装饰器传参</h3>
-                <p>
-                  全部参数均可省略；长期运行或持久化配置的项目建议显式填写稳定
-                  id。
-                </p>
+                <p>全部参数均可省略；长期运行或持久化配置的项目建议显式填写稳定 id。</p>
               </div>
             </header>
             <div class="docs-table-shell">
@@ -221,22 +200,15 @@ const interventionActions = [
                   <code>ToolResult</code>
                   <p>返回 content、artifact 和 metadata。</p>
                 </div>
-                <small
-                  >必须显式声明返回类型，实际结果必须与声明一致并可 JSON
-                  序列化。</small
-                >
+                <small>必须显式声明返回类型，实际结果必须与声明一致并可 JSON 序列化。</small>
               </article>
             </div>
             <div class="signature-lane">
               <div><span>参数名</span><strong>决定工具输入字段</strong></div>
               <i>→</i>
-              <div>
-                <span>类型标注</span><strong>决定字段类型与校验</strong>
-              </div>
+              <div><span>类型标注</span><strong>决定字段类型与校验</strong></div>
               <i>→</i>
-              <div>
-                <span>Annotated + Field</span><strong>补充模型可见描述</strong>
-              </div>
+              <div><span>Annotated + Field</span><strong>补充模型可见描述</strong></div>
             </div>
           </section>
 
@@ -261,25 +233,19 @@ const interventionActions = [
             </header>
             <ul>
               <li>
-                <strong>模块没有被导入</strong
-                ><span>装饰器从未执行，后台自然无法发现工具。</span>
+                <strong>模块没有被导入</strong><span>装饰器从未执行，后台自然无法发现工具。</span>
               </li>
               <li>
-                <strong>缺少类型标注</strong
-                ><span>任一参数或返回值没有明确类型都会拒绝注册。</span>
+                <strong>缺少类型标注</strong><span>任一参数或返回值没有明确类型都会拒绝注册。</span>
               </li>
               <li>
-                <strong>使用 Any、*args 或 **kwargs</strong
-                ><span>无法生成确定的输入 Schema。</span>
+                <strong>使用 Any、*args 或 **kwargs</strong><span>无法生成确定的输入 Schema。</span>
               </li>
               <li>
                 <strong>返回值不匹配</strong
                 ><span>调用时返回了错误类型或不可 JSON 序列化对象。</span>
               </li>
-              <li>
-                <strong>ID 冲突</strong
-                ><span>自定义 ID 已被另一条 Python 路径占用。</span>
-              </li>
+              <li><strong>ID 冲突</strong><span>自定义 ID 已被另一条 Python 路径占用。</span></li>
             </ul>
           </section>
         </section>
@@ -289,9 +255,7 @@ const interventionActions = [
             <span>02</span>
             <div>
               <h2>注册插件</h2>
-              <p>
-                把初始化逻辑、生命周期 Hook 与实例工具组织成一个可复用能力。
-              </p>
+              <p>把初始化逻辑、生命周期 Hook 与实例工具组织成一个可复用能力。</p>
             </div>
           </header>
 
@@ -388,39 +352,34 @@ const interventionActions = [
               </article>
               <i>→</i>
               <article>
-                <span>清理</span><code>close(self)</code
-                ><small>可选，可同步或异步</small>
+                <span>清理</span><code>close(self)</code><small>可选，可同步或异步</small>
               </article>
             </div>
             <div class="docs-context-band">
               <strong>配置期可确定</strong>
               <div>
-                <code v-for="field in configuredContextFields" :key="field">{{
-                  field
-                }}</code>
+                <code v-for="field in configuredContextFields" :key="field">{{ field }}</code>
               </div>
             </div>
             <div class="docs-context-band">
               <strong>请求运行时产生</strong>
               <div>
-                <code v-for="field in requestContextFields" :key="field">{{
-                  field
-                }}</code>
+                <code v-for="field in requestContextFields" :key="field">{{ field }}</code>
               </div>
             </div>
             <div class="docs-contract-grid">
               <article class="docs-contract-card">
                 <h4>PluginAgent 允许访问</h4>
                 <p>
-                  id、name、system_prompt、state、tool_names、model_name。只有
-                  system_prompt 暴露了直接赋值入口。
+                  id、name、system_prompt、state、tool_names、model_name。只有 system_prompt
+                  暴露了直接赋值入口。
                 </p>
               </article>
               <article class="docs-contract-card">
                 <h4>配置如何进入后台</h4>
                 <p>
-                  config_model 的 JSON Schema 生成配置表单；用户填写的值经
-                  Pydantic 校验后成为 context.config。
+                  config_model 的 JSON Schema 生成配置表单；用户填写的值经 Pydantic 校验后成为
+                  context.config。
                 </p>
               </article>
             </div>
@@ -452,26 +411,16 @@ const interventionActions = [
               </li>
               <li>
                 <strong>成员装饰器混用</strong
-                ><span
-                  >plugin_hook 不能放入 hook_group，plugin_tool 只能属于
-                  plugin。</span
-                >
+                ><span>plugin_hook 不能放入 hook_group，plugin_tool 只能属于 plugin。</span>
               </li>
               <li>
                 <strong>生命周期签名错误</strong
-                ><span
-                  >init_agent 必须是 self、agent；close 只能接收 self。</span
-                >
+                ><span>init_agent 必须是 self、agent；close 只能接收 self。</span>
               </li>
-              <li>
-                <strong>插件工具重名</strong
-                ><span>同一个插件内的模型工具名必须唯一。</span>
-              </li>
+              <li><strong>插件工具重名</strong><span>同一个插件内的模型工具名必须唯一。</span></li>
               <li>
                 <strong>配置模型无效</strong
-                ><span
-                  >config_model 必须继承 BaseModel 且能生成 JSON Schema。</span
-                >
+                ><span>config_model 必须继承 BaseModel 且能生成 JSON Schema。</span>
               </li>
             </ul>
           </section>
@@ -509,8 +458,7 @@ const interventionActions = [
               <h4><span>1</span>怎么注册</h4>
               <div class="decorator-deck single">
                 <article class="decorator-card featured">
-                  <code>@register.hook</code
-                  ><strong>一个函数，一个 Hook 资源</strong>
+                  <code>@register.hook</code><strong>一个函数，一个 Hook 资源</strong>
                   <p>适合无实例状态的日志、追踪和轻量事件处理。</p>
                 </article>
               </div>
@@ -550,8 +498,7 @@ const interventionActions = [
               <h4><span>3</span>函数契约</h4>
               <div class="signature-blueprint">
                 <code
-                  >def callback(event: Event, context: HookContext | None = ...)
-                  -&gt; None</code
+                  >def callback(event: Event, context: HookContext | None = ...) -&gt; None</code
                 >
                 <p>
                   第一个参数必须有 Event 类型标注；可选第二参数必须命名为
@@ -561,15 +508,11 @@ const interventionActions = [
             </div>
             <div class="docs-mode-step">
               <h4><span>4</span>完整示例</h4>
-              <CodeExample
-                title="函数 Hook：记录调用身份"
-                :code="standaloneHookCode"
-              />
+              <CodeExample title="函数 Hook：记录调用身份" :code="standaloneHookCode" />
             </div>
             <div class="mode-failures">
-              <strong>常见失败</strong><span>event 未标注</span
-              ><span>额外参数不叫 context</span><span>注册 ID 重复</span
-              ><span>异步初始化事件</span>
+              <strong>常见失败</strong><span>event 未标注</span><span>额外参数不叫 context</span
+              ><span>注册 ID 重复</span><span>异步初始化事件</span>
             </div>
           </section>
 
@@ -585,8 +528,7 @@ const interventionActions = [
               <h4><span>1</span>怎么注册</h4>
               <div class="decorator-deck">
                 <article class="decorator-card featured">
-                  <code>@register.hook_group</code
-                  ><strong>注册 Hook class</strong>
+                  <code>@register.hook_group</code><strong>注册 Hook class</strong>
                   <p>创建一个可共享状态的 Hook 资源。</p>
                 </article>
                 <article class="decorator-card">
@@ -627,27 +569,16 @@ const interventionActions = [
             <div class="docs-mode-step">
               <h4><span>3</span>class 与方法契约</h4>
               <div class="signature-lane two">
-                <div>
-                  <span>构造函数</span
-                  ><strong>无参数，或 __init__(self, context)</strong>
-                </div>
+                <div><span>构造函数</span><strong>无参数，或 __init__(self, context)</strong></div>
                 <i>→</i>
-                <div>
-                  <span>回调方法</span
-                  ><strong>self + 已标注的 event；可选 context</strong>
-                </div>
+                <div><span>回调方法</span><strong>self + 已标注的 event；可选 context</strong></div>
                 <i>→</i>
-                <div>
-                  <span>清理</span><strong>可选 close(self)，支持异步</strong>
-                </div>
+                <div><span>清理</span><strong>可选 close(self)，支持异步</strong></div>
               </div>
             </div>
             <div class="docs-mode-step">
               <h4><span>4</span>完整示例</h4>
-              <CodeExample
-                title="分组 Hook：统计工具耗时"
-                :code="hookGroupCode"
-              />
+              <CodeExample title="分组 Hook：统计工具耗时" :code="hookGroupCode" />
             </div>
             <div class="mode-failures">
               <strong>常见失败</strong><span>没有任何 hook_callback</span
@@ -661,10 +592,7 @@ const interventionActions = [
               <span>参考</span>
               <div>
                 <h3>可监听的事件</h3>
-                <p>
-                  从 meldfabric.events 导入；一个 Hook 回调也可以标注 Event
-                  联合类型。
-                </p>
+                <p>从 meldfabric.events 导入；一个 Hook 回调也可以标注 Event 联合类型。</p>
               </div>
             </header>
             <div class="event-catalog">
@@ -674,8 +602,7 @@ const interventionActions = [
               </article>
             </div>
             <aside class="docs-note">
-              AgentInitializedEvent 与 MultiAgentInitializedEvent
-              的回调必须是同步函数。Hook
+              AgentInitializedEvent 与 MultiAgentInitializedEvent 的回调必须是同步函数。Hook
               位于推理链路内，耗时任务应投递到外部队列。
             </aside>
           </section>
@@ -686,9 +613,7 @@ const interventionActions = [
             <span>04</span>
             <div>
               <h2>注册 Interventions</h2>
-              <p>
-                在五个明确的运行边界返回策略动作；需要共享状态时再使用分组模式。
-              </p>
+              <p>在五个明确的运行边界返回策略动作；需要共享状态时再使用分组模式。</p>
             </div>
           </header>
 
@@ -715,8 +640,7 @@ const interventionActions = [
               <h4><span>1</span>怎么注册</h4>
               <div class="decorator-deck single">
                 <article class="decorator-card featured">
-                  <code>@register.intervention</code
-                  ><strong>一个函数，一个决策边界</strong>
+                  <code>@register.intervention</code><strong>一个函数，一个决策边界</strong>
                   <p>Event 类型决定它在哪个运行位置被调用。</p>
                 </article>
               </div>
@@ -756,26 +680,21 @@ const interventionActions = [
               <h4><span>3</span>函数契约</h4>
               <div class="signature-blueprint">
                 <code
-                  >def policy(event: SupportedEvent, context:
-                  InterventionContext | None = ...) -&gt; Action</code
+                  >def policy(event: SupportedEvent, context: InterventionContext | None = ...)
+                  -&gt; Action</code
                 >
                 <p>
-                  只能标注一个受支持 Event；必须返回该 Event 允许的
-                  Action，支持同步或异步函数。
+                  只能标注一个受支持 Event；必须返回该 Event 允许的 Action，支持同步或异步函数。
                 </p>
               </div>
             </div>
             <div class="docs-mode-step">
               <h4><span>4</span>完整示例</h4>
-              <CodeExample
-                title="函数 Intervention：高风险工具确认"
-                :code="interventionCode"
-              />
+              <CodeExample title="函数 Intervention：高风险工具确认" :code="interventionCode" />
             </div>
             <div class="mode-failures">
               <strong>常见失败</strong><span>使用 Event 联合类型</span
-              ><span>Event 不属于五个策略边界</span
-              ><span>返回了该边界不允许的 Action</span
+              ><span>Event 不属于五个策略边界</span><span>返回了该边界不允许的 Action</span
               ><span>config_model 校验失败</span>
             </div>
           </section>
@@ -792,13 +711,11 @@ const interventionActions = [
               <h4><span>1</span>怎么注册</h4>
               <div class="decorator-deck">
                 <article class="decorator-card featured">
-                  <code>@register.intervention_group</code
-                  ><strong>注册策略 class</strong>
+                  <code>@register.intervention_group</code><strong>注册策略 class</strong>
                   <p>共享配置、上下文和实例状态。</p>
                 </article>
                 <article class="decorator-card">
-                  <code>@intervention_callback</code
-                  ><strong>标记策略方法</strong>
+                  <code>@intervention_callback</code><strong>标记策略方法</strong>
                   <p>方法的 Event 标注决定触发边界。</p>
                 </article>
               </div>
@@ -835,36 +752,22 @@ const interventionActions = [
               </div>
               <div class="member-decorator-note">
                 <code>@intervention_callback</code>
-                <span
-                  >装饰器本身没有参数；Event 和 Action
-                  契约写在方法签名中。</span
-                >
+                <span>装饰器本身没有参数；Event 和 Action 契约写在方法签名中。</span>
               </div>
             </div>
             <div class="docs-mode-step">
               <h4><span>3</span>class 与方法契约</h4>
               <div class="signature-lane two">
-                <div>
-                  <span>构造函数</span
-                  ><strong>无参数，或 __init__(self, context)</strong>
-                </div>
+                <div><span>构造函数</span><strong>无参数，或 __init__(self, context)</strong></div>
                 <i>→</i>
-                <div>
-                  <span>每个方法</span><strong>只能处理一种受支持 Event</strong>
-                </div>
+                <div><span>每个方法</span><strong>只能处理一种受支持 Event</strong></div>
                 <i>→</i>
-                <div>
-                  <span>同一 class</span
-                  ><strong>每种 Event 最多一个回调</strong>
-                </div>
+                <div><span>同一 class</span><strong>每种 Event 最多一个回调</strong></div>
               </div>
             </div>
             <div class="docs-mode-step">
               <h4><span>4</span>完整示例</h4>
-              <CodeExample
-                title="分组 Intervention：运行策略"
-                :code="interventionGroupCode"
-              />
+              <CodeExample title="分组 Intervention：运行策略" :code="interventionGroupCode" />
             </div>
             <div class="mode-failures">
               <strong>常见失败</strong><span>没有 intervention_callback</span
@@ -888,8 +791,7 @@ const interventionActions = [
               </article>
             </div>
             <div class="action-legend">
-              <span><strong>Proceed</strong>继续</span
-              ><span><strong>Deny</strong>阻止</span
+              <span><strong>Proceed</strong>继续</span><span><strong>Deny</strong>阻止</span
               ><span><strong>Guide</strong>反馈并引导</span
               ><span><strong>Transform</strong>原地修改 Event</span
               ><span><strong>Confirm</strong>暂停等待确认</span>
@@ -916,24 +818,14 @@ const interventionActions = [
             </header>
             <div class="decorator-deck single">
               <article class="decorator-card featured">
-                <code>@register.graph_condition</code
-                ><strong>装饰同步判断函数</strong>
+                <code>@register.graph_condition</code><strong>装饰同步判断函数</strong>
                 <p>每次准备沿边继续时执行；返回 true 才允许通行。</p>
               </article>
             </div>
             <ol class="docs-registration-path three">
-              <li>
-                <span>1</span><strong>注册条件</strong
-                ><small>定义同步 bool 函数</small>
-              </li>
-              <li>
-                <span>2</span><strong>创建 Graph</strong
-                ><small>在画布中连接节点</small>
-              </li>
-              <li>
-                <span>3</span><strong>配置边</strong
-                ><small>选择条件并填写参数</small>
-              </li>
+              <li><span>1</span><strong>注册条件</strong><small>定义同步 bool 函数</small></li>
+              <li><span>2</span><strong>创建 Graph</strong><small>在画布中连接节点</small></li>
+              <li><span>3</span><strong>配置边</strong><small>选择条件并填写参数</small></li>
             </ol>
           </section>
 
@@ -979,8 +871,7 @@ const interventionActions = [
             </header>
             <div class="condition-signature">
               <article class="required">
-                <code>state: GraphState</code
-                ><strong>必填 · 第一个位置参数</strong>
+                <code>state: GraphState</code><strong>必填 · 第一个位置参数</strong>
                 <p>读取 results、completed_nodes、failed_nodes、status。</p>
               </article>
               <article>
@@ -1020,15 +911,10 @@ const interventionActions = [
               <span>4</span>
               <div>
                 <h3>完整示例</h3>
-                <p>
-                  分别展示直接读取当前路径上下文，以及让管理员选择任意节点。
-                </p>
+                <p>分别展示直接读取当前路径上下文，以及让管理员选择任意节点。</p>
               </div>
             </header>
-            <CodeExample
-              title="当前路径与可配置节点条件"
-              :code="conditionCode"
-            />
+            <CodeExample title="当前路径与可配置节点条件" :code="conditionCode" />
           </section>
 
           <section class="docs-failure-panel">
@@ -1040,10 +926,7 @@ const interventionActions = [
               </div>
             </header>
             <ul>
-              <li>
-                <strong>声明为 async</strong
-                ><span>Graph 条件只支持同步函数。</span>
-              </li>
+              <li><strong>声明为 async</strong><span>Graph 条件只支持同步函数。</span></li>
               <li>
                 <strong>第一个参数不是 state</strong
                 ><span>state 必须是第一个位置参数且名称固定。</span>
@@ -1052,10 +935,7 @@ const interventionActions = [
                 <strong>出现其他参数名</strong
                 ><span>只允许 state、context、invocation_state。</span>
               </li>
-              <li>
-                <strong>返回值不是 bool</strong
-                ><span>注册标注和运行结果都会被校验。</span>
-              </li>
+              <li><strong>返回值不是 bool</strong><span>注册标注和运行结果都会被校验。</span></li>
               <li>
                 <strong>执行外部副作用</strong
                 ><span>网络请求或写操作会让路径判断变慢且不可预测。</span>

@@ -23,12 +23,7 @@ async function copy() {
 </script>
 
 <template>
-  <button
-    type="button"
-    class="technical-id"
-    :title="`复制 ${label}`"
-    @click="copy"
-  >
+  <button type="button" class="technical-id" :title="`复制 ${label}`" @click="copy">
     <span>{{ label }}</span>
     <code>{{ value }}</code>
     <small v-if="detail">{{ detail }}</small>

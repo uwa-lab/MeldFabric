@@ -12,12 +12,7 @@ const stats = computed(() => [
 ]);
 
 const steps = [
-  [
-    "连接模型",
-    "配置服务商凭据，发现并注册一个模型。",
-    "/resources/models",
-    "配置模型",
-  ],
+  ["连接模型", "配置服务商凭据，发现并注册一个模型。", "/resources/models", "配置模型"],
   [
     "检查工具",
     "先在 Python 代码中使用 @register.tool，启动后在这里确认注册结果。",
@@ -36,12 +31,7 @@ const steps = [
     "/orchestrations",
     "创建编排",
   ],
-  [
-    "发布服务",
-    "将 Agent 或编排绑定到发布端点，并为调用方生成 API Key。",
-    "/endpoints",
-    "发布端点",
-  ],
+  ["发布服务", "将 Agent 或编排绑定到发布端点，并为调用方生成 API Key。", "/endpoints", "发布端点"],
 ];
 </script>
 
@@ -58,12 +48,7 @@ const steps = [
     </header>
 
     <section class="stat-grid" aria-label="工作空间状态">
-      <RouterLink
-        v-for="[label, count, path] in stats"
-        :key="label"
-        :to="path"
-        class="stat-card"
-      >
+      <RouterLink v-for="[label, count, path] in stats" :key="label" :to="path" class="stat-card">
         <span>{{ label }}</span
         ><strong>{{ count }}</strong>
       </RouterLink>
@@ -73,19 +58,12 @@ const steps = [
       <header>
         <div>
           <h2>快速启动</h2>
-          <UiDescription
-            >从可运行的最小配置开始，再逐步增加协作与扩展能力。</UiDescription
-          >
+          <UiDescription>从可运行的最小配置开始，再逐步增加协作与扩展能力。</UiDescription>
         </div>
       </header>
       <ol>
-        <li
-          v-for="([title, description, path, action], index) in steps"
-          :key="title"
-        >
-          <span class="step-number">{{
-            String(index + 1).padStart(2, "0")
-          }}</span>
+        <li v-for="([title, description, path, action], index) in steps" :key="title">
+          <span class="step-number">{{ String(index + 1).padStart(2, "0") }}</span>
           <div>
             <h3>{{ title }}</h3>
             <UiDescription>{{ description }}</UiDescription>

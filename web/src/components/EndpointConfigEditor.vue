@@ -1,42 +1,37 @@
 <script setup>
 import { computed, onMounted, ref } from "vue";
 import { api, post } from "../api.js";
-import { state, collection, notify } from "../store.js";
+import { collection, notify } from "../store.js";
 import SelectControl from "./SelectControl.vue";
 import SettingRow from "./SettingRow.vue";
 import ModalFrame from "./ModalFrame.vue";
 
 const props = defineProps({
-  draft: Object,
   entityId: String,
   creating: Boolean,
 });
+const draft = defineModel("draft", { type: Object, required: true });
 const keys = ref([]);
 const revealed = ref(null);
 const loadingKeys = ref(false);
 
 const targetItems = computed(() =>
-  (props.draft.target_type === "agent"
-    ? collection("agents")
-    : collection("orchestrations")
-  )
+  (draft.value.target_type === "agent" ? collection("agents") : collection("orchestrations"))
     .filter((item) => item.enabled !== false)
     .map((item) => ({ value: item.id, label: item.display_name || item.name })),
 );
 
 function changeTargetType(type) {
-  props.draft.target_type = type;
-  props.draft.target_ref = targetItems.value[0]?.value || null;
+  draft.value.target_type = type;
+  draft.value.target_ref = targetItems.value[0]?.value || null;
   if (type === "orchestration")
-    props.draft.protocols = props.draft.protocols.filter(
-      (item) => item !== "a2a",
-    );
+    draft.value.protocols = draft.value.protocols.filter((item) => item !== "a2a");
 }
 
 function toggleProtocol(protocol) {
-  props.draft.protocols = props.draft.protocols.includes(protocol)
-    ? props.draft.protocols.filter((item) => item !== protocol)
-    : [...props.draft.protocols, protocol];
+  draft.value.protocols = draft.value.protocols.includes(protocol)
+    ? draft.value.protocols.filter((item) => item !== protocol)
+    : [...draft.value.protocols, protocol];
 }
 
 async function loadKeys() {
@@ -44,9 +39,7 @@ async function loadKeys() {
   loadingKeys.value = true;
   try {
     keys.value = (
-      await api(
-        `/admin/endpoints/${props.entityId}/keys?include_inactive=false`,
-      )
+      await api(`/admin/endpoints/${props.entityId}/keys?include_inactive=false`)
     ).items;
   } finally {
     loadingKeys.value = false;
@@ -82,11 +75,7 @@ onMounted(loadKeys);
     <section class="editor-panel">
       <div class="stacked-fields">
         <label
-          >名称<input
-            v-model="draft.name"
-            class="field"
-            required
-            placeholder="public_assistant"
+          >名称<input v-model="draft.name" class="field" required placeholder="public_assistant"
         /></label>
         <label
           >用途描述<textarea
@@ -102,9 +91,7 @@ onMounted(loadKeys);
       <div class="subsection-heading">
         <div>
           <h3>执行目标</h3>
-          <UiDescription
-            >每个端点只发布一个目标；修改目标不会复制或改动其配置。</UiDescription
-          >
+          <UiDescription>每个端点只发布一个目标；修改目标不会复制或改动其配置。</UiDescription>
         </div>
       </div>
       <div class="target-switch">
@@ -123,10 +110,7 @@ onMounted(loadKeys);
         </button>
       </div>
       <div class="settings-group">
-        <SettingRow
-          title="目标"
-          description="端点调用时实际执行的 Agent 或编排。"
-          required
+        <SettingRow title="目标" description="端点调用时实际执行的 Agent 或编排。" required
           ><SelectControl v-model="draft.target_ref" :options="targetItems"
         /></SettingRow>
       </div>
@@ -136,10 +120,7 @@ onMounted(loadKeys);
       <div class="subsection-heading">
         <div>
           <h3>开放协议</h3>
-          <UiDescription
-            >A2A 只能直接发布 Agent，其他协议同时支持 Agent
-            与编排。</UiDescription
-          >
+          <UiDescription>A2A 只能直接发布 Agent，其他协议同时支持 Agent 与编排。</UiDescription>
         </div>
       </div>
       <div class="protocol-grid">
@@ -181,18 +162,14 @@ onMounted(loadKeys);
       <div class="collection-heading">
         <div>
           <h3>访问 Key</h3>
-          <UiDescription
-            >Key 只在创建时完整显示；后台仅保留前缀和状态。</UiDescription
-          >
+          <UiDescription>Key 只在创建时完整显示；后台仅保留前缀和状态。</UiDescription>
         </div>
         <div class="button-row">
-          <UiButton variant="secondary" @click="createKey('agent_api')"
-            >生成 API Key</UiButton
+          <UiButton variant="secondary" @click="createKey('agent_api')">生成 API Key</UiButton
           ><UiButton
             variant="secondary"
             :disabled="
-              !draft.protocols.includes('meldfabric_remote') &&
-              !draft.protocols.includes('a2a')
+              !draft.protocols.includes('meldfabric_remote') && !draft.protocols.includes('a2a')
             "
             @click="createKey('remote_access')"
             >生成远程 Key</UiButton
@@ -208,10 +185,9 @@ onMounted(loadKeys);
               {{ key.scopes.join(", ") }}</small
             >
           </div>
-          <span
-            class="state-pill"
-            :class="key.status === 'active' ? 'on' : 'off'"
-            >{{ key.status }}</span
+          <span class="state-pill" :class="key.status === 'active' ? 'on' : 'off'">{{
+            key.status
+          }}</span
           ><UiButton
             v-if="key.status === 'active'"
             variant="danger"
@@ -221,9 +197,7 @@ onMounted(loadKeys);
           </UiButton>
         </article>
       </div>
-      <p v-else-if="!loadingKeys" class="empty-copy">
-        还没有为这个端点生成访问 Key。
-      </p>
+      <p v-else-if="!loadingKeys" class="empty-copy">还没有为这个端点生成访问 Key。</p>
     </section>
   </div>
 

@@ -7,13 +7,10 @@ import ToggleSwitch from "./ToggleSwitch.vue";
 import GraphCanvas from "./GraphCanvas.vue";
 import WorkflowCanvas from "./WorkflowCanvas.vue";
 
-const props = defineProps({ draft: Object, creating: Boolean });
-const agents = computed(() =>
-  collection("agents").filter((item) => item.enabled !== false),
-);
-const databases = computed(() =>
-  collection("databases").filter((item) => item.enabled !== false),
-);
+defineProps({ creating: Boolean });
+const draft = defineModel("draft", { type: Object, required: true });
+const agents = computed(() => collection("agents").filter((item) => item.enabled !== false));
+const databases = computed(() => collection("databases").filter((item) => item.enabled !== false));
 const remotes = computed(() =>
   collection("remote_agents").filter((item) => item.enabled !== false),
 );
@@ -29,9 +26,7 @@ const databaseOptions = computed(() =>
     label: item.display_name || item.name,
   })),
 );
-const graphConditions = computed(
-  () => state.features?.code_registrations?.graph_condition || [],
-);
+const graphConditions = computed(() => state.features?.code_registrations?.graph_condition || []);
 const graphConditionOptions = computed(() => [
   { value: null, label: "无条件" },
   ...graphConditions.value.map((item) => ({
@@ -40,14 +35,13 @@ const graphConditionOptions = computed(() => [
   })),
 ]);
 
-const generated = (prefix) =>
-  `${prefix}_${crypto.randomUUID().replaceAll("-", "")}`;
+const generated = (prefix) => `${prefix}_${crypto.randomUUID().replaceAll("-", "")}`;
 
 function selectKind(kind) {
   const common = {
-    name: props.draft.name,
-    description: props.draft.description,
-    enabled: props.draft.enabled,
+    name: draft.value.name,
+    description: draft.value.description,
+    enabled: draft.value.enabled,
     kind,
   };
   let next = common;
@@ -97,21 +91,21 @@ function selectKind(kind) {
       primary_task_ref: task.id,
     };
   }
-  for (const key of Object.keys(props.draft)) delete props.draft[key];
-  Object.assign(props.draft, next);
+  for (const key of Object.keys(draft.value)) delete draft.value[key];
+  Object.assign(draft.value, next);
 }
 
 function toggleSwarmAgent(id) {
-  props.draft.agent_refs = props.draft.agent_refs.includes(id)
-    ? props.draft.agent_refs.filter((item) => item !== id)
-    : [...props.draft.agent_refs, id];
-  if (!props.draft.agent_refs.includes(props.draft.entry_agent_ref))
-    props.draft.entry_agent_ref = props.draft.agent_refs[0] || null;
+  draft.value.agent_refs = draft.value.agent_refs.includes(id)
+    ? draft.value.agent_refs.filter((item) => item !== id)
+    : [...draft.value.agent_refs, id];
+  if (!draft.value.agent_refs.includes(draft.value.entry_agent_ref))
+    draft.value.entry_agent_ref = draft.value.agent_refs[0] || null;
 }
 
 function addMember(agent) {
-  if (props.draft.members.some((item) => item.agent_ref === agent.id)) return;
-  props.draft.members.push({
+  if (draft.value.members.some((item) => item.agent_ref === agent.id)) return;
+  draft.value.members.push({
     id: generated("member"),
     agent_ref: agent.id,
     name: null,
@@ -121,13 +115,11 @@ function addMember(agent) {
 }
 
 function removeMember(agentId) {
-  props.draft.members = props.draft.members.filter(
-    (item) => item.agent_ref !== agentId,
-  );
+  draft.value.members = draft.value.members.filter((item) => item.agent_ref !== agentId);
 }
 
 function enableSession(value) {
-  props.draft.session_manager = value
+  draft.value.session_manager = value
     ? {
         database_ref: databases.value[0]?.id || null,
         save_latest_on: "invocation",
@@ -141,11 +133,7 @@ function enableSession(value) {
     <section class="editor-panel identity-panel">
       <div class="stacked-fields">
         <label
-          >名称<input
-            v-model="draft.name"
-            class="field"
-            required
-            placeholder="research_team"
+          >名称<input v-model="draft.name" class="field" required placeholder="research_team"
         /></label>
         <label
           >用途描述<textarea
@@ -161,9 +149,7 @@ function enableSession(value) {
       <header>
         <div>
           <h3>选择协作方式</h3>
-          <UiDescription
-            >创建后不能更换模式；不同模式具有不同的入口与执行边界。</UiDescription
-          >
+          <UiDescription>创建后不能更换模式；不同模式具有不同的入口与执行边界。</UiDescription>
         </div>
       </header>
       <div class="mode-grid">
@@ -193,27 +179,17 @@ function enableSession(value) {
       </div>
     </section>
 
-    <section
-      v-if="draft.kind === 'agent_as_tool'"
-      class="editor-panel orchestration-stage"
-    >
+    <section v-if="draft.kind === 'agent_as_tool'" class="editor-panel orchestration-stage">
       <div class="coordinator-card">
         <span class="stage-label">COORDINATOR</span>
-        <div>
-          <strong>协调 Agent</strong><small>接收请求并决定调用哪个成员。</small>
-        </div>
-        <SelectControl
-          v-model="draft.coordinator_ref"
-          :options="agentOptions"
-        />
+        <div><strong>协调 Agent</strong><small>接收请求并决定调用哪个成员。</small></div>
+        <SelectControl v-model="draft.coordinator_ref" :options="agentOptions" />
       </div>
       <div class="member-bench">
         <header>
           <div>
             <h3>成员工作台</h3>
-            <UiDescription
-              >点选候选 Agent 加入；加入后会作为原生 Agent Tool。</UiDescription
-            >
+            <UiDescription>点选候选 Agent 加入；加入后会作为原生 Agent Tool。</UiDescription>
           </div>
           <span>{{ draft.members.length }} 名成员</span>
         </header>
@@ -230,14 +206,10 @@ function enableSession(value) {
               type="button"
               @click="addMember(agent)"
             >
-              <span class="agent-avatar">{{
-                agent.name.slice(0, 1).toUpperCase()
-              }}</span
+              <span class="agent-avatar">{{ agent.name.slice(0, 1).toUpperCase() }}</span
               ><span
                 ><strong>{{ agent.display_name || agent.name }}</strong
-                ><small>{{
-                  agent.description || "未填写用途描述"
-                }}</small></span
+                ><small>{{ agent.description || "未填写用途描述" }}</small></span
               ><span>＋</span>
             </button>
             <p
@@ -245,9 +217,7 @@ function enableSession(value) {
                 !agents.some(
                   (item) =>
                     item.id !== draft.coordinator_ref &&
-                    !draft.members.some(
-                      (member) => member.agent_ref === item.id,
-                    ),
+                    !draft.members.some((member) => member.agent_ref === item.id),
                 )
               "
               class="empty-copy"
@@ -257,10 +227,7 @@ function enableSession(value) {
           </div>
           <div class="member-pool attached">
             <span class="column-label">已加入</span>
-            <article
-              v-for="member in draft.members"
-              :key="member.id || member.agent_ref"
-            >
+            <article v-for="member in draft.members" :key="member.id || member.agent_ref">
               <span class="agent-avatar">{{
                 agents
                   .find((item) => item.id === member.agent_ref)
@@ -269,13 +236,9 @@ function enableSession(value) {
               }}</span>
               <div>
                 <strong>{{
-                  agents.find((item) => item.id === member.agent_ref)?.name ||
-                  "资源不可用"
+                  agents.find((item) => item.id === member.agent_ref)?.name || "资源不可用"
                 }}</strong>
-                <ToggleSwitch
-                  v-model="member.preserve_context"
-                  label="共享上下文"
-                />
+                <ToggleSwitch v-model="member.preserve_context" label="共享上下文" />
               </div>
               <UiButton
                 variant="danger"
@@ -284,25 +247,18 @@ function enableSession(value) {
                 >×</UiButton
               >
             </article>
-            <p v-if="!draft.members.length" class="empty-copy">
-              尚未加入成员。
-            </p>
+            <p v-if="!draft.members.length" class="empty-copy">尚未加入成员。</p>
           </div>
         </div>
       </div>
     </section>
 
-    <section
-      v-else-if="draft.kind === 'swarm'"
-      class="editor-panel orchestration-stage"
-    >
+    <section v-else-if="draft.kind === 'swarm'" class="editor-panel orchestration-stage">
       <div class="swarm-stage">
         <header>
           <div>
             <h3>Swarm 成员</h3>
-            <UiDescription
-              >点选 Agent 进入协作网络，再指定入口成员。</UiDescription
-            >
+            <UiDescription>点选 Agent 进入协作网络，再指定入口成员。</UiDescription>
           </div>
           <strong>{{ draft.agent_refs.length }}</strong>
         </header>
@@ -317,9 +273,7 @@ function enableSession(value) {
             }"
             @click="toggleSwarmAgent(agent.id)"
           >
-            <span class="agent-avatar">{{
-              agent.name.slice(0, 1).toUpperCase()
-            }}</span
+            <span class="agent-avatar">{{ agent.name.slice(0, 1).toUpperCase() }}</span
             ><strong>{{ agent.display_name || agent.name }}</strong
             ><small>{{
               draft.entry_agent_ref === agent.id
@@ -335,11 +289,7 @@ function enableSession(value) {
         <label
           >入口 Agent<SelectControl
             v-model="draft.entry_agent_ref"
-            :options="
-              agentOptions.filter((option) =>
-                draft.agent_refs.includes(option.value),
-              )
-            "
+            :options="agentOptions.filter((option) => draft.agent_refs.includes(option.value))"
         /></label>
         <label
           >最大交接次数<input
@@ -365,13 +315,11 @@ function enableSession(value) {
       <header class="stage-heading">
         <div>
           <h3>Graph 画布</h3>
-          <UiDescription
-            >拖拽整理节点；右击或长按节点可设置入口、发起连接或删除。</UiDescription
-          >
+          <UiDescription>拖拽整理节点；右击或长按节点可设置入口、发起连接或删除。</UiDescription>
         </div>
       </header>
       <GraphCanvas
-        :draft="draft"
+        v-model:draft="draft"
         :agents="agents"
         :remotes="remotes"
         :condition-options="graphConditionOptions"
@@ -383,18 +331,13 @@ function enableSession(value) {
       <header class="stage-heading">
         <div>
           <h3>Workflow 画布</h3>
-          <UiDescription
-            >拖拽整理任务；右击或长按任务可编辑并连接后续任务。</UiDescription
-          >
+          <UiDescription>拖拽整理任务；右击或长按任务可编辑并连接后续任务。</UiDescription>
         </div>
       </header>
-      <WorkflowCanvas :draft="draft" :agents="agents" />
+      <WorkflowCanvas v-model:draft="draft" :agents="agents" />
     </section>
 
-    <section
-      v-if="['swarm', 'graph'].includes(draft.kind)"
-      class="editor-panel session-dock"
-    >
+    <section v-if="['swarm', 'graph'].includes(draft.kind)" class="editor-panel session-dock">
       <div>
         <span class="stage-label">PERSISTENCE</span><strong>编排会话快照</strong
         ><small>保存协作过程、节点状态与恢复信息。</small>

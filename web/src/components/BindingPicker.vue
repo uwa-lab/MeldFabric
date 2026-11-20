@@ -12,9 +12,7 @@ const props = defineProps({
 });
 const emit = defineEmits(["update:modelValue"]);
 
-const byId = computed(
-  () => new Map(props.items.map((item) => [item.id, item])),
-);
+const byId = computed(() => new Map(props.items.map((item) => [item.id, item])));
 const attached = computed(() =>
   props.modelValue.map((binding, index) => ({
     binding,
@@ -24,9 +22,7 @@ const attached = computed(() =>
 );
 const available = computed(() => {
   const used = new Set(props.modelValue.map((item) => item[props.refField]));
-  return props.items.filter(
-    (item) => item.enabled !== false && !used.has(item.id),
-  );
+  return props.items.filter((item) => item.enabled !== false && !used.has(item.id));
 });
 
 function add(item) {
@@ -51,18 +47,11 @@ function remove(index) {
         <strong>已挂载</strong><span>{{ attached.length }}</span>
       </header>
       <div class="binding-list">
-        <article
-          v-for="entry in attached"
-          :key="entry.binding.id || entry.index"
-        >
+        <article v-for="entry in attached" :key="entry.binding.id || entry.index">
           <div>
-            <strong>{{
-              entry.item?.display_name || entry.item?.name || "资源不可用"
-            }}</strong>
+            <strong>{{ entry.item?.display_name || entry.item?.name || "资源不可用" }}</strong>
           </div>
-          <UiButton variant="danger" @click="remove(entry.index)">
-            移除
-          </UiButton>
+          <UiButton variant="danger" @click="remove(entry.index)"> 移除 </UiButton>
         </article>
         <p v-if="!attached.length" class="empty-copy">{{ emptyAttached }}</p>
       </div>
@@ -77,9 +66,7 @@ function remove(index) {
             <strong>{{ item.display_name || item.name }}</strong>
             <small v-if="item.description">{{ item.description }}</small>
           </div>
-          <button type="button" class="text-button" @click="add(item)">
-            添加
-          </button>
+          <button type="button" class="text-button" @click="add(item)">添加</button>
         </article>
         <p v-if="!available.length" class="empty-copy">{{ emptyAvailable }}</p>
       </div>

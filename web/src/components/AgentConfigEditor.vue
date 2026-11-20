@@ -8,7 +8,7 @@ import BindingPicker from "./BindingPicker.vue";
 import PromptEditor from "./PromptEditor.vue";
 import StructuredSettings from "./StructuredSettings.vue";
 
-const props = defineProps({ draft: Object });
+const draft = defineModel("draft", { type: Object, required: true });
 const tabs = [
   ["basic", "基本设置"],
   ["prompt", "Prompt"],
@@ -33,9 +33,7 @@ const options = (items, empty = "不使用") => [
 const modelOptions = computed(() => options(collection("models"), "尚未选择"));
 const databaseOptions = computed(() => options(collection("databases")));
 const sandboxOptions = computed(() => options(collection("sandbox_profiles")));
-const observabilityOptions = computed(() =>
-  options(collection("observability_providers")),
-);
+const observabilityOptions = computed(() => options(collection("observability_providers")));
 const jsonObjectSchema = computed(
   () =>
     state.features?.structured_schemas?.json_object || {
@@ -45,12 +43,7 @@ const jsonObjectSchema = computed(
 );
 const remoteNames = computed(
   () =>
-    new Map(
-      collection("remote_agents").map((item) => [
-        item.id,
-        item.display_name || item.name,
-      ]),
-    ),
+    new Map(collection("remote_agents").map((item) => [item.id, item.display_name || item.name])),
 );
 const sessionPolicyOptions = [
   { value: "per_call", label: "每次调用新会话" },
@@ -70,7 +63,7 @@ function setRemoteSession(binding, value) {
 }
 
 function enableSession(value) {
-  props.draft.session_manager = value
+  draft.value.session_manager = value
     ? {
         database_ref: collection("databases")[0]?.id || null,
         save_latest_on: "invocation",
@@ -79,7 +72,7 @@ function enableSession(value) {
     : null;
 }
 function enableMemory(value) {
-  props.draft.memory_manager = value
+  draft.value.memory_manager = value
     ? {
         database_ref: collection("databases")[0]?.id || null,
         namespace: null,
@@ -108,11 +101,7 @@ function enableMemory(value) {
     <section v-if="tab === 'basic'" class="editor-panel">
       <div class="stacked-fields">
         <label
-          >名称<input
-            v-model="draft.name"
-            class="field"
-            required
-            placeholder="research_agent"
+          >名称<input v-model="draft.name" class="field" required placeholder="research_agent"
         /></label>
         <label
           >用途描述<textarea
@@ -123,10 +112,7 @@ function enableMemory(value) {
         </label>
       </div>
       <div class="settings-group">
-        <SettingRow
-          title="推理模型"
-          description="未启用的模型不会出现在候选列表中。"
-          required
+        <SettingRow title="推理模型" description="未启用的模型不会出现在候选列表中。" required
           ><SelectControl v-model="draft.model_ref" :options="modelOptions"
         /></SettingRow>
       </div>
@@ -177,24 +163,16 @@ function enableMemory(value) {
                 interaction_policy: 'bubble_to_parent',
               }"
             />
-            <div
-              v-if="draft.remote_tool_bindings.length"
-              class="remote-binding-settings"
-            >
+            <div v-if="draft.remote_tool_bindings.length" class="remote-binding-settings">
               <header>
                 <h3>调用策略</h3>
-                <UiDescription
-                  >为每个远程 Agent
-                  独立设置会话映射与交互处理方式。</UiDescription
-                >
+                <UiDescription>为每个远程 Agent 独立设置会话映射与交互处理方式。</UiDescription>
               </header>
               <article
                 v-for="binding in draft.remote_tool_bindings"
                 :key="binding.id || binding.remote_agent_ref"
               >
-                <strong>{{
-                  remoteNames.get(binding.remote_agent_ref) || "资源不可用"
-                }}</strong>
+                <strong>{{ remoteNames.get(binding.remote_agent_ref) || "资源不可用" }}</strong>
                 <SelectControl
                   :model-value="binding.session_policy"
                   :options="sessionPolicyOptions"
@@ -205,9 +183,7 @@ function enableMemory(value) {
                   v-model="binding.interaction_policy"
                   :options="
                     binding.session_policy === 'per_call'
-                      ? interactionPolicyOptions.filter(
-                          (item) => item.value === 'fail',
-                        )
+                      ? interactionPolicyOptions.filter((item) => item.value === 'fail')
                       : interactionPolicyOptions
                   "
                   aria-label="远程交互策略"
@@ -238,9 +214,7 @@ function enableMemory(value) {
       <template v-if="draft.context_manager.strategy === 'disabled'">
         <div class="section-divider" />
         <div class="settings-group">
-          <SettingRow
-            title="会话裁剪策略"
-            description="只在上下文管理关闭时生效。"
+          <SettingRow title="会话裁剪策略" description="只在上下文管理关闭时生效。"
             ><SelectControl
               v-model="draft.conversation_manager.strategy"
               :options="
@@ -270,11 +244,8 @@ function enableMemory(value) {
               type="number"
               min="0"
           /></SettingRow>
-          <SettingRow
-            title="主动压缩"
-            description="接近模型上下文限制前主动整理内容。"
-            ><ToggleSwitch
-              v-model="draft.conversation_manager.proactive_compression"
+          <SettingRow title="主动压缩" description="接近模型上下文限制前主动整理内容。"
+            ><ToggleSwitch v-model="draft.conversation_manager.proactive_compression"
           /></SettingRow>
         </div>
       </template>
@@ -284,27 +255,15 @@ function enableMemory(value) {
       <div class="subsection-heading">
         <div>
           <h3>会话快照</h3>
-          <UiDescription
-            >保存 Strands Agent 的消息、状态和中断恢复数据。</UiDescription
-          >
+          <UiDescription>保存 Strands Agent 的消息、状态和中断恢复数据。</UiDescription>
         </div>
-        <ToggleSwitch
-          :model-value="!!draft.session_manager"
-          @update:model-value="enableSession"
-        />
+        <ToggleSwitch :model-value="!!draft.session_manager" @update:model-value="enableSession" />
       </div>
       <div v-if="draft.session_manager" class="settings-group">
-        <SettingRow
-          title="存储数据库"
-          description="需要支持 session_storage 能力。"
-          required
-          ><SelectControl
-            v-model="draft.session_manager.database_ref"
-            :options="databaseOptions"
+        <SettingRow title="存储数据库" description="需要支持 session_storage 能力。" required
+          ><SelectControl v-model="draft.session_manager.database_ref" :options="databaseOptions"
         /></SettingRow>
-        <SettingRow
-          title="保存时机"
-          description="一次调用结束或每条消息后写入快照。"
+        <SettingRow title="保存时机" description="一次调用结束或每条消息后写入快照。"
           ><SelectControl
             v-model="draft.session_manager.save_latest_on"
             :options="[
@@ -312,9 +271,7 @@ function enableMemory(value) {
               { value: 'message', label: '每条消息' },
             ]"
         /></SettingRow>
-        <SettingRow
-          title="启用 Checkpoint"
-          description="为原生干预和恢复记录中间检查点。"
+        <SettingRow title="启用 Checkpoint" description="为原生干预和恢复记录中间检查点。"
           ><ToggleSwitch v-model="draft.session_manager.checkpointing"
         /></SettingRow>
       </div>
@@ -322,23 +279,13 @@ function enableMemory(value) {
       <div class="subsection-heading">
         <div>
           <h3>长期记忆</h3>
-          <UiDescription
-            >按 Agent 与用户隔离的 Strands MemoryManager。</UiDescription
-          >
+          <UiDescription>按 Agent 与用户隔离的 Strands MemoryManager。</UiDescription>
         </div>
-        <ToggleSwitch
-          :model-value="!!draft.memory_manager"
-          @update:model-value="enableMemory"
-        />
+        <ToggleSwitch :model-value="!!draft.memory_manager" @update:model-value="enableMemory" />
       </div>
       <div v-if="draft.memory_manager" class="settings-group">
-        <SettingRow
-          title="存储数据库"
-          description="需要支持 memory_storage 能力。"
-          required
-          ><SelectControl
-            v-model="draft.memory_manager.database_ref"
-            :options="databaseOptions"
+        <SettingRow title="存储数据库" description="需要支持 memory_storage 能力。" required
+          ><SelectControl v-model="draft.memory_manager.database_ref" :options="databaseOptions"
         /></SettingRow>
         <SettingRow title="命名空间" description="在默认隔离键上增加业务分区。"
           ><input
@@ -346,19 +293,13 @@ function enableMemory(value) {
             class="field compact-control"
             placeholder="default"
         /></SettingRow>
-        <SettingRow
-          title="记忆搜索工具"
-          description="允许模型主动检索长期记忆。"
+        <SettingRow title="记忆搜索工具" description="允许模型主动检索长期记忆。"
           ><ToggleSwitch v-model="draft.memory_manager.search_tool"
         /></SettingRow>
-        <SettingRow
-          title="记忆写入工具"
-          description="允许模型主动写入长期记忆。"
+        <SettingRow title="记忆写入工具" description="允许模型主动写入长期记忆。"
           ><ToggleSwitch v-model="draft.memory_manager.add_tool"
         /></SettingRow>
-        <SettingRow
-          title="自动注入"
-          description="运行时自动把相关记忆注入上下文。"
+        <SettingRow title="自动注入" description="运行时自动把相关记忆注入上下文。"
           ><ToggleSwitch v-model="draft.memory_manager.injection"
         /></SettingRow>
       </div>
@@ -368,9 +309,7 @@ function enableMemory(value) {
       <div class="extension-stack">
         <div>
           <h3>插件</h3>
-          <UiDescription
-            >插件可在初始化阶段补充提示词、工具和生命周期行为。</UiDescription
-          >
+          <UiDescription>插件可在初始化阶段补充提示词、工具和生命周期行为。</UiDescription>
           <BindingPicker
             v-model="draft.plugin_bindings"
             :items="collection('plugins')"
@@ -381,9 +320,7 @@ function enableMemory(value) {
         </div>
         <div>
           <h3>Hooks</h3>
-          <UiDescription
-            >在已注册的生命周期事件发生时执行应用代码。</UiDescription
-          >
+          <UiDescription>在已注册的生命周期事件发生时执行应用代码。</UiDescription>
           <BindingPicker
             v-model="draft.hook_bindings"
             :items="collection('hooks')"
@@ -394,9 +331,7 @@ function enableMemory(value) {
         </div>
         <div>
           <h3>Interventions</h3>
-          <UiDescription
-            >在工具调用期间介入；人工确认需要启用会话快照。</UiDescription
-          >
+          <UiDescription>在工具调用期间介入；人工确认需要启用会话快照。</UiDescription>
           <BindingPicker
             v-model="draft.intervention_bindings"
             :items="collection('interventions')"
@@ -426,40 +361,27 @@ function enableMemory(value) {
             min="1"
             max="20"
         /></SettingRow>
-        <SettingRow
-          title="后台任务"
-          description="允许工具在当前调用结束前并行执行长耗时工作。"
+        <SettingRow title="后台任务" description="允许工具在当前调用结束前并行执行长耗时工作。"
           ><ToggleSwitch v-model="draft.background_tasks.enabled"
         /></SettingRow>
-        <SettingRow
-          title="执行沙箱"
-          description="需要隔离执行的工具只有选择沙箱后才能运行。"
+        <SettingRow title="执行沙箱" description="需要隔离执行的工具只有选择沙箱后才能运行。"
           ><SelectControl v-model="draft.sandbox_ref" :options="sandboxOptions"
         /></SettingRow>
-        <SettingRow
-          title="运行观测"
-          description="把调用链路发送到已配置的 Langfuse 服务。"
-          ><SelectControl
-            v-model="draft.observability_ref"
-            :options="observabilityOptions"
+        <SettingRow title="运行观测" description="把调用链路发送到已配置的 Langfuse 服务。"
+          ><SelectControl v-model="draft.observability_ref" :options="observabilityOptions"
         /></SettingRow>
       </div>
       <div class="section-divider" />
       <div class="subsection-heading">
         <div>
           <h3>结构化输出</h3>
-          <UiDescription
-            >让 Agent 结果按 JSON Schema 解析为结构化对象。</UiDescription
-          >
+          <UiDescription>让 Agent 结果按 JSON Schema 解析为结构化对象。</UiDescription>
         </div>
         <ToggleSwitch v-model="draft.structured_output.enabled" />
       </div>
       <div v-if="draft.structured_output.enabled" class="stacked-fields">
         <label
-          >输出类型名称<input
-            v-model="draft.structured_output.name"
-            class="field"
-            required
+          >输出类型名称<input v-model="draft.structured_output.name" class="field" required
         /></label>
         <StructuredSettings
           v-model="draft.structured_output.json_schema"

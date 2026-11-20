@@ -7,11 +7,7 @@ export const JSON_TYPES = [
   { value: "null", label: "空值" },
 ];
 
-export const FORBIDDEN_KEYS = new Set([
-  "__proto__",
-  "prototype",
-  "constructor",
-]);
+export const FORBIDDEN_KEYS = new Set(["__proto__", "prototype", "constructor"]);
 
 export function cloneValue(value) {
   if (value === undefined) return undefined;
@@ -33,8 +29,7 @@ function pointer(root, reference) {
   while (pending.length) {
     const value = pending.pop();
     if (!value || typeof value !== "object") continue;
-    if (value.$anchor === anchor || value.$dynamicAnchor === anchor)
-      return value;
+    if (value.$anchor === anchor || value.$dynamicAnchor === anchor) return value;
     pending.push(...Object.values(value));
   }
   return null;
@@ -49,9 +44,7 @@ function mergeSchemas(parts) {
         ...(part.properties || {}),
       };
     if (result.required || part.required)
-      next.required = [
-        ...new Set([...(result.required || []), ...(part.required || [])]),
-      ];
+      next.required = [...new Set([...(result.required || []), ...(part.required || [])])];
     return next;
   }, {});
 }
@@ -63,17 +56,13 @@ export function resolveSchema(schema = {}, root = schema, trail = new Set()) {
     if (target)
       value = {
         ...resolveSchema(target, root, new Set(trail).add(value.$ref)),
-        ...Object.fromEntries(
-          Object.entries(value).filter(([key]) => key !== "$ref"),
-        ),
+        ...Object.fromEntries(Object.entries(value).filter(([key]) => key !== "$ref")),
       };
   }
   if (Array.isArray(value.allOf))
     value = mergeSchemas([
       ...value.allOf.map((item) => resolveSchema(item, root, trail)),
-      Object.fromEntries(
-        Object.entries(value).filter(([key]) => key !== "allOf"),
-      ),
+      Object.fromEntries(Object.entries(value).filter(([key]) => key !== "allOf")),
     ]);
   const variants = value.anyOf;
   if (Array.isArray(variants)) {
@@ -82,9 +71,7 @@ export function resolveSchema(schema = {}, root = schema, trail = new Set()) {
       value = {
         ...resolveSchema(nonNull[0], root, trail),
         ...Object.fromEntries(
-          Object.entries(value).filter(
-            ([key]) => !["anyOf", "type"].includes(key),
-          ),
+          Object.entries(value).filter(([key]) => !["anyOf", "type"].includes(key)),
         ),
         nullable: true,
       };
@@ -96,8 +83,7 @@ export function valueType(value) {
   if (value === null) return "null";
   if (Array.isArray(value)) return "array";
   if (typeof value === "object") return "object";
-  if (typeof value === "number")
-    return Number.isInteger(value) ? "integer" : "number";
+  if (typeof value === "number") return Number.isInteger(value) ? "integer" : "number";
   if (["string", "boolean"].includes(typeof value)) return typeof value;
   return "string";
 }
@@ -118,19 +104,13 @@ export function variantsFor(schema, root = schema) {
   const resolved = resolveSchema(schema, root);
   const variants =
     resolved.oneOf ||
-    (Array.isArray(resolved.anyOf) && resolved.anyOf.length > 1
-      ? resolved.anyOf
-      : null);
+    (Array.isArray(resolved.anyOf) && resolved.anyOf.length > 1 ? resolved.anyOf : null);
   return (variants || []).map((item, index) => {
     const definition = resolveSchema(item, root);
     return {
       schema: definition,
       index,
-      label:
-        definition.title ||
-        definition.const ||
-        definition.type ||
-        `选项 ${index + 1}`,
+      label: definition.title || definition.const || definition.type || `选项 ${index + 1}`,
     };
   });
 }
@@ -150,27 +130,20 @@ export function finiteChoicesFor(schema, root = schema) {
         choices.push({
           value,
           label:
-            definition.enum.length === 1 && definition.title
-              ? definition.title
-              : String(value),
+            definition.enum.length === 1 && definition.title ? definition.title : String(value),
         }),
       );
       continue;
     }
     if (definition.type === "boolean") {
-      choices.push(
-        { value: false, label: "关闭" },
-        { value: true, label: "开启" },
-      );
+      choices.push({ value: false, label: "关闭" }, { value: true, label: "开启" });
       continue;
     }
     return [];
   }
   const unique = choices.filter(
     (choice, index) =>
-      choices.findIndex((candidate) =>
-        Object.is(candidate.value, choice.value),
-      ) === index,
+      choices.findIndex((candidate) => Object.is(candidate.value, choice.value)) === index,
   );
   return unique.length <= 6 ? unique : [];
 }
@@ -178,8 +151,7 @@ export function finiteChoicesFor(schema, root = schema) {
 export function schemaType(schema, value, root = schema) {
   const resolved = effectiveSchema(schema, value, root);
   if (resolved.const !== undefined) return valueType(resolved.const);
-  if (Array.isArray(resolved.type))
-    return resolved.type.find((item) => item !== "null") || "null";
+  if (Array.isArray(resolved.type)) return resolved.type.find((item) => item !== "null") || "null";
   return resolved.type || valueType(value);
 }
 
@@ -194,8 +166,7 @@ export function defaultValue(schema = {}, root = schema) {
     const result = {};
     for (const [key, field] of Object.entries(resolved.properties || {})) {
       const definition = resolveSchema(field, root);
-      if (Object.hasOwn(definition, "default"))
-        result[key] = cloneValue(definition.default);
+      if (Object.hasOwn(definition, "default")) result[key] = cloneValue(definition.default);
     }
     return result;
   }
@@ -234,9 +205,7 @@ export function summary(value) {
       .map((key) => entries.find(([candidate]) => candidate === key))
       .find((entry) => ["string", "number"].includes(typeof entry?.[1]))?.[1];
     const count = `${entries.length} 个字段`;
-    return identity === undefined || identity === ""
-      ? count
-      : `${String(identity)} · ${count}`;
+    return identity === undefined || identity === "" ? count : `${String(identity)} · ${count}`;
   }
   if (typeof value === "boolean") return value ? "是" : "否";
   const text = String(value ?? "");

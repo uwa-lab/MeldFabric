@@ -1,12 +1,6 @@
 import { computed, onBeforeUnmount, reactive, ref } from "vue";
 
-export function useInfiniteCanvas({
-  items,
-  positionOf,
-  updatePosition,
-  nodeWidth,
-  nodeHeight,
-}) {
+export function useInfiniteCanvas({ items, positionOf, updatePosition, nodeWidth, nodeHeight }) {
   const canvas = ref();
   const pan = reactive({ x: 36, y: 46 });
   const interaction = reactive({
@@ -97,8 +91,7 @@ export function useInfiniteCanvas({
     return point;
   }
   function end(event) {
-    if (interaction.pointerId != null)
-      canvas.value?.releasePointerCapture?.(interaction.pointerId);
+    if (interaction.pointerId != null) canvas.value?.releasePointerCapture?.(interaction.pointerId);
     interaction.mode = null;
     interaction.pointerId = null;
     interaction.itemId = null;

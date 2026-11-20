@@ -1,7 +1,7 @@
 <script setup>
 import { computed, onMounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
-import { api, post } from "../api.js";
+import { post } from "../api.js";
 import { collection, notify, saveEntity, state } from "../store.js";
 import SettingRow from "./SettingRow.vue";
 import ToggleSwitch from "./ToggleSwitch.vue";
@@ -15,11 +15,11 @@ import ConfigurationModes from "./ConfigurationModes.vue";
 
 const props = defineProps({
   type: String,
-  draft: Object,
   creating: Boolean,
   entityId: String,
   secret: String,
 });
+const draft = defineModel("draft", { type: Object, required: true });
 const emit = defineEmits(["update:secret"]);
 const router = useRouter();
 const busy = ref("");
@@ -38,31 +38,25 @@ const databaseOptions = computed(() => options(collection("databases")));
 const availableSkillSources = computed(() =>
   collection("skill_sources").filter((item) => item.enabled !== false),
 );
-const structuredSchemas = computed(
-  () => state.features?.structured_schemas || {},
-);
+const structuredSchemas = computed(() => state.features?.structured_schemas || {});
 const databaseOptionSchema = computed(
   () =>
-    structuredSchemas.value.database_options?.[props.draft.engine] ||
+    structuredSchemas.value.database_options?.[draft.value.engine] ||
     structuredSchemas.value.json_object ||
     {},
 );
 const sandboxConfigSchema = computed(
   () =>
-    structuredSchemas.value.sandbox_config?.[props.draft.provider] ||
+    structuredSchemas.value.sandbox_config?.[draft.value.provider] ||
     structuredSchemas.value.json_object ||
     {},
 );
 const selectedProvider = computed(() =>
-  collection("model_providers").find(
-    (item) => item.id === props.draft.provider_ref,
-  ),
+  collection("model_providers").find((item) => item.id === draft.value.provider_ref),
 );
 const modelParametersSchema = computed(
   () =>
-    structuredSchemas.value.model_parameters?.[
-      selectedProvider.value?.adapter
-    ] ||
+    structuredSchemas.value.model_parameters?.[selectedProvider.value?.adapter] ||
     structuredSchemas.value.json_object ||
     {},
 );
@@ -83,8 +77,7 @@ const registeredModelIds = computed(
         .map((item) => item.model_name),
     ),
 );
-const registeredDefinitions = (kind) =>
-  state.features?.code_registrations?.[kind] || [];
+const registeredDefinitions = (kind) => state.features?.code_registrations?.[kind] || [];
 const registrationOptions = (kind) =>
   registeredDefinitions(kind).map((item) => ({
     value: item.id,
@@ -122,37 +115,35 @@ const configOptionSources = computed(() => {
 });
 const registrationKind = computed(() => {
   if (props.type === "hooks") return "hook";
-  if (props.type === "plugins" && props.draft.kind === "registered")
-    return "plugin";
-  if (props.type === "interventions" && props.draft.kind === "registered")
-    return "intervention";
+  if (props.type === "plugins" && draft.value.kind === "registered") return "plugin";
+  if (props.type === "interventions" && draft.value.kind === "registered") return "intervention";
   return null;
 });
 const selectedRegistration = computed(() =>
   registrationKind.value
     ? registeredDefinitions(registrationKind.value).find(
-        (item) => item.id === props.draft.registration_id,
+        (item) => item.id === draft.value.registration_id,
       )
     : null,
 );
 
 watch(
-  () => props.draft.registration_id,
+  () => draft.value.registration_id,
   (next, previous) => {
     if (!next || next === previous || !selectedRegistration.value) return;
-    props.draft.config = {};
+    draft.value.config = {};
   },
 );
 watch(
-  () => [props.type, props.entityId, props.draft.kind],
+  () => [props.type, props.entityId, draft.value.kind],
   () => {
     configurationMode.value = "basic";
   },
 );
 const mcpToolNamesText = computed({
-  get: () => props.draft.mcp_tool_names?.join(", ") || "",
+  get: () => draft.value.mcp_tool_names?.join(", ") || "",
   set: (value) => {
-    props.draft.mcp_tool_names = [
+    draft.value.mcp_tool_names = [
       ...new Set(
         value
           .split(",")
@@ -169,9 +160,7 @@ const resultFacts = computed(() => {
       ([, value]) =>
         ["string", "number", "boolean"].includes(typeof value) ||
         (Array.isArray(value) &&
-          value.every((item) =>
-            ["string", "number", "boolean"].includes(typeof item),
-          )),
+          value.every((item) => ["string", "number", "boolean"].includes(typeof item))),
     )
     .map(([key, value]) => [
       key.replaceAll("_", " "),
@@ -183,13 +172,10 @@ async function discoverModels() {
   discoveryOpen.value = true;
   busy.value = "discover";
   try {
-    result.value = await post(
-      "/admin/resources/model-providers/discover-preview",
-      {
-        resource: props.draft,
-        api_key: props.secret || null,
-      },
-    );
+    result.value = await post("/admin/resources/model-providers/discover-preview", {
+      resource: draft.value,
+      api_key: props.secret || null,
+    });
   } catch (error) {
     notify(error.message, true);
   } finally {
@@ -231,25 +217,19 @@ async function testCurrent(silent = false) {
   busy.value = "test";
   try {
     if (props.type === "databases")
-      result.value = await post(
-        `/admin/resources/databases/${props.entityId}/test`,
-      );
+      result.value = await post(`/admin/resources/databases/${props.entityId}/test`);
     if (props.type === "mcp_servers")
-      result.value = await post(
-        `/admin/resources/mcp-servers/${props.entityId}/test`,
-      );
+      result.value = await post(`/admin/resources/mcp-servers/${props.entityId}/test`);
     if (props.type === "skill_sources")
-      result.value = await post(
-        `/admin/resources/skill-sources/${props.entityId}/scan`,
-      );
+      result.value = await post(`/admin/resources/skill-sources/${props.entityId}/scan`);
     if (props.type === "models") {
       const provider = collection("model_providers").find(
-        (item) => item.id === props.draft.provider_ref,
+        (item) => item.id === draft.value.provider_ref,
       );
-      result.value = await post(
-        "/admin/resources/model-providers/test-preview",
-        { resource: provider, model: props.draft },
-      );
+      result.value = await post("/admin/resources/model-providers/test-preview", {
+        resource: provider,
+        model: draft.value,
+      });
     }
     if (!silent) {
       if (props.type === "databases")
@@ -290,21 +270,18 @@ async function discoverRemote() {
   try {
     const discovered = props.secret
       ? await post("/admin/resources/remote-agents/discover", {
-          base_url: props.draft.base_url,
+          base_url: draft.value.base_url,
           access_key: props.secret,
           protocol: "auto",
-          timeout_seconds: props.draft.timeout_seconds,
+          timeout_seconds: draft.value.timeout_seconds,
         })
       : await post(`/admin/resources/remote-agents/${props.entityId}/discover`);
-    props.draft.remote_service_id = discovered.service_id;
-    props.draft.remote_agent_id = discovered.agent_id;
-    props.draft.protocols = discovered.protocols;
-    if (!props.draft.description)
-      props.draft.description = discovered.description;
+    draft.value.remote_service_id = discovered.service_id;
+    draft.value.remote_agent_id = discovered.agent_id;
+    draft.value.protocols = discovered.protocols;
+    if (!draft.value.description) draft.value.description = discovered.description;
     result.value = discovered;
-    notify(
-      `远程 Agent 发现成功 · ${discovered.agent_id || discovered.service_id}`,
-    );
+    notify(`远程 Agent 发现成功 · ${discovered.agent_id || discovered.service_id}`);
   } catch (error) {
     notify(error.message, true);
   } finally {
@@ -313,7 +290,7 @@ async function discoverRemote() {
 }
 
 function resetVariant(kind) {
-  const common = { name: props.draft.name, enabled: props.draft.enabled, kind };
+  const common = { name: draft.value.name, enabled: draft.value.enabled, kind };
   let specific = {};
   if (props.type === "plugins" && kind === "agent_skills")
     specific = { skill_source_refs: [], strict: false };
@@ -337,10 +314,9 @@ function resetVariant(kind) {
     specific = { tool_refs: [], mcp_tool_names: [], enable_trust: false };
   if (props.type === "interventions" && kind === "registered")
     specific = { registration_id: "", config: {}, on_error: "throw" };
-  for (const key of Object.keys(props.draft))
-    if (!["id", "display_name", "managed_by", "metadata"].includes(key))
-      delete props.draft[key];
-  Object.assign(props.draft, common, specific);
+  for (const key of Object.keys(draft.value))
+    if (!["id", "display_name", "managed_by", "metadata"].includes(key)) delete draft.value[key];
+  Object.assign(draft.value, common, specific);
 }
 
 onMounted(() => {
@@ -353,11 +329,7 @@ onMounted(() => {
     <section class="editor-panel">
       <div class="stacked-fields">
         <label
-          >名称<input
-            v-model="draft.name"
-            class="field"
-            :readonly="type === 'tools'"
-            required
+          >名称<input v-model="draft.name" class="field" :readonly="type === 'tools'" required
         /></label>
         <label v-if="type === 'remote_agents'"
           >模型可见描述<textarea
@@ -370,42 +342,28 @@ onMounted(() => {
     </section>
 
     <section v-if="type === 'model_providers'" class="editor-panel">
-      <ConfigurationModes
-        v-model="configurationMode"
-        advanced-label="自定义 Header"
-      >
+      <ConfigurationModes v-model="configurationMode" advanced-label="自定义 Header">
         <template #basic>
           <div class="settings-group">
             <SettingRow
               title="服务地址"
               description="兼容 OpenAI API 的基础 URL，例如 https://example.com/v1。"
               required
-              ><input
-                v-model="draft.base_url"
-                class="field control-wide"
-                type="url"
+              ><input v-model="draft.base_url" class="field control-wide" type="url"
             /></SettingRow>
-            <SettingRow
-              title="协议适配器"
-              description="决定模型发现和请求的协议实现。"
+            <SettingRow title="协议适配器" description="决定模型发现和请求的协议实现。"
               ><SelectControl
                 v-model="draft.adapter"
-                :options="[
-                  { value: 'openai_compatible', label: 'OpenAI Compatible' },
-                ]"
+                :options="[{ value: 'openai_compatible', label: 'OpenAI Compatible' }]"
             /></SettingRow>
-            <SettingRow
-              title="请求超时"
-              description="服务商发现与默认模型请求的等待时间。"
+            <SettingRow title="请求超时" description="服务商发现与默认模型请求的等待时间。"
               ><input
                 v-model.number="draft.timeout_seconds"
                 class="field compact-control"
                 type="number"
                 min="1"
             /></SettingRow>
-            <SettingRow
-              title="API Key"
-              description="留空不会清除已经保存的凭据。"
+            <SettingRow title="API Key" description="留空不会清除已经保存的凭据。"
               ><input
                 :value="secret"
                 class="field control-wide"
@@ -416,11 +374,7 @@ onMounted(() => {
           </div>
         </template>
         <template #advanced>
-          <StructuredSettings
-            v-model="draft.headers"
-            :schema="stringMapSchema"
-            headerless
-          />
+          <StructuredSettings v-model="draft.headers" :schema="stringMapSchema" headerless />
         </template>
       </ConfigurationModes>
       <div class="provider-actions">
@@ -438,23 +392,13 @@ onMounted(() => {
       <ConfigurationModes v-model="configurationMode" advanced-label="推理设置">
         <template #basic>
           <div class="settings-group">
-            <SettingRow
-              title="模型服务商"
-              description="凭据和基础 URL 由服务商统一管理。"
-              required
-              ><SelectControl
-                v-model="draft.provider_ref"
-                :options="providerOptions"
+            <SettingRow title="模型服务商" description="凭据和基础 URL 由服务商统一管理。" required
+              ><SelectControl v-model="draft.provider_ref" :options="providerOptions"
             /></SettingRow>
-            <SettingRow
-              title="服务商模型 ID"
-              description="请求中实际发送的模型名。"
-              required
+            <SettingRow title="服务商模型 ID" description="请求中实际发送的模型名。" required
               ><input v-model="draft.model_name" class="field control-wide"
             /></SettingRow>
-            <SettingRow
-              title="请求协议"
-              description="某些推理模型只支持 Responses API。"
+            <SettingRow title="请求协议" description="某些推理模型只支持 Responses API。"
               ><SelectControl
                 v-model="draft.protocol"
                 :options="[
@@ -492,9 +436,7 @@ onMounted(() => {
                 min="0.1"
                 step="0.1"
             /></SettingRow>
-            <SettingRow
-              title="最大重试"
-              description="留空使用模型适配器默认值。"
+            <SettingRow title="最大重试" description="留空使用模型适配器默认值。"
               ><input
                 v-model.number="draft.max_retries"
                 class="field compact-control"
@@ -506,9 +448,7 @@ onMounted(() => {
           <div class="subsection-heading">
             <div>
               <h3>显式能力</h3>
-              <UiDescription
-                >不按模型名称猜测。未确认保持“未知”，确认不支持时关闭。</UiDescription
-              >
+              <UiDescription>不按模型名称猜测。未确认保持“未知”，确认不支持时关闭。</UiDescription>
             </div>
           </div>
           <div class="model-capability-grid">
@@ -542,10 +482,7 @@ onMounted(() => {
         </template>
       </ConfigurationModes>
       <div v-if="!creating" class="action-strip">
-        <UiButton
-          variant="secondary"
-          :busy="busy === 'test'"
-          @click="testCurrent()"
+        <UiButton variant="secondary" :busy="busy === 'test'" @click="testCurrent()"
           >测试模型</UiButton
         ><span>发送最小文本请求验证协议、参数和凭据。</span>
       </div>
@@ -555,9 +492,7 @@ onMounted(() => {
       <ConfigurationModes v-model="configurationMode" advanced-label="连接选项">
         <template #basic>
           <div class="settings-group">
-            <SettingRow
-              title="数据库类型"
-              description="决定连接驱动和可用能力。"
+            <SettingRow title="数据库类型" description="决定连接驱动和可用能力。"
               ><SelectControl
                 v-model="draft.engine"
                 :options="
@@ -575,50 +510,32 @@ onMounted(() => {
           </div>
         </template>
         <template #advanced>
-          <StructuredSettings
-            v-model="draft.options"
-            :schema="databaseOptionSchema"
-            headerless
-          />
+          <StructuredSettings v-model="draft.options" :schema="databaseOptionSchema" headerless />
         </template>
       </ConfigurationModes>
       <div v-if="!creating" class="action-strip">
-        <UiButton
-          variant="secondary"
-          :busy="busy === 'test'"
-          @click="testCurrent()"
+        <UiButton variant="secondary" :busy="busy === 'test'" @click="testCurrent()"
           >测试连接</UiButton
-        ><span v-if="result?.capabilities"
-          >能力：{{ result.capabilities.join("、") }}</span
-        >
+        ><span v-if="result?.capabilities">能力：{{ result.capabilities.join("、") }}</span>
       </div>
     </section>
 
     <section v-else-if="type === 'tools'" class="editor-panel">
       <div class="settings-group">
-        <SettingRow
-          title="Python 位置"
-          description="由 @register.tool 注册，只读。"
+        <SettingRow title="Python 位置" description="由 @register.tool 注册，只读。"
           ><code>{{ draft.python_path }}</code></SettingRow
-        ><SettingRow
-          title="需要沙箱"
-          description="启用后，挂载此工具的 Agent 必须选择沙箱。"
+        ><SettingRow title="需要沙箱" description="启用后，挂载此工具的 Agent 必须选择沙箱。"
           ><ToggleSwitch v-model="draft.requires_sandbox"
         /></SettingRow>
       </div>
-      <ToolDescriptionEditor :draft="draft" />
+      <ToolDescriptionEditor v-model:draft="draft" />
     </section>
 
     <section v-else-if="type === 'mcp_servers'" class="editor-panel">
-      <ConfigurationModes
-        v-model="configurationMode"
-        advanced-label="自定义 Header"
-      >
+      <ConfigurationModes v-model="configurationMode" advanced-label="自定义 Header">
         <template #basic>
           <div class="settings-group">
-            <SettingRow
-              title="Streamable HTTP URL"
-              description="当前版本只开放 streamable_http。"
+            <SettingRow title="Streamable HTTP URL" description="当前版本只开放 streamable_http。"
               ><input
                 v-model="draft.url"
                 class="field control-wide"
@@ -629,12 +546,8 @@ onMounted(() => {
                 :value="secret"
                 class="field control-wide"
                 type="password"
-                @input="
-                  emit('update:secret', $event.target.value)
-                " /></SettingRow
-            ><SettingRow
-              title="请求超时"
-              description="连接与工具调用的最长等待时间。"
+                @input="emit('update:secret', $event.target.value)" /></SettingRow
+            ><SettingRow title="请求超时" description="连接与工具调用的最长等待时间。"
               ><input
                 v-model.number="draft.timeout_seconds"
                 class="field compact-control"
@@ -644,18 +557,11 @@ onMounted(() => {
           </div>
         </template>
         <template #advanced>
-          <StructuredSettings
-            v-model="draft.headers"
-            :schema="stringMapSchema"
-            headerless
-          />
+          <StructuredSettings v-model="draft.headers" :schema="stringMapSchema" headerless />
         </template>
       </ConfigurationModes>
       <div v-if="!creating" class="action-strip">
-        <UiButton
-          variant="secondary"
-          :busy="busy === 'test'"
-          @click="testCurrent()"
+        <UiButton variant="secondary" :busy="busy === 'test'" @click="testCurrent()"
           >测试连接</UiButton
         >
       </div>
@@ -663,9 +569,7 @@ onMounted(() => {
 
     <section v-else-if="type === 'remote_agents'" class="editor-panel">
       <div class="settings-group">
-        <SettingRow
-          title="服务地址"
-          description="MeldFabric Remote 或 A2A 服务基础 URL。"
+        <SettingRow title="服务地址" description="MeldFabric Remote 或 A2A 服务基础 URL。"
           ><input
             v-model="draft.base_url"
             class="field control-wide"
@@ -692,9 +596,7 @@ onMounted(() => {
           :disabled="creating && !secret"
           @click="discoverRemote"
           >发现远程 Agent</UiButton
-        ><span v-if="draft.protocols?.length"
-          >协议：{{ draft.protocols.join("、") }}</span
-        >
+        ><span v-if="draft.protocols?.length">协议：{{ draft.protocols.join("、") }}</span>
       </div>
     </section>
 
@@ -703,26 +605,16 @@ onMounted(() => {
         <SettingRow
           title="Skill 目录"
           description="相对路径以 state_dir 为根；每个 Skill 子目录应包含 SKILL.md。"
-          ><input
-            v-model="draft.path"
-            class="field control-wide"
-            required /></SettingRow
+          ><input v-model="draft.path" class="field control-wide" required /></SettingRow
         ><SettingRow title="加载顺序" description="数字较大的目录后加载。"
-          ><input
-            v-model.number="draft.order"
-            class="field compact-control"
-            type="number"
+          ><input v-model.number="draft.order" class="field compact-control" type="number"
         /></SettingRow>
       </div>
       <div v-if="!creating" class="action-strip">
-        <UiButton
-          variant="secondary"
-          :busy="busy === 'test'"
-          @click="testCurrent()"
+        <UiButton variant="secondary" :busy="busy === 'test'" @click="testCurrent()"
           >扫描 Skill</UiButton
         ><span v-if="result"
-          >找到 {{ result.skills?.length || result.items?.length || 0 }} 个
-          Skill</span
+          >找到 {{ result.skills?.length || result.items?.length || 0 }} 个 Skill</span
         >
       </div>
       <div v-if="result?.skills?.length" class="skill-catalog">
@@ -732,15 +624,10 @@ onMounted(() => {
             <strong>{{ skill.name }}</strong
             ><small>{{ skill.description || skill.path }}</small>
           </div>
-          <code v-if="skill.allowed_tools?.length">{{
-            skill.allowed_tools.join(", ")
-          }}</code>
+          <code v-if="skill.allowed_tools?.length">{{ skill.allowed_tools.join(", ") }}</code>
         </article>
       </div>
-      <div
-        v-else-if="result && !result.skills?.length"
-        class="empty-state compact"
-      >
+      <div v-else-if="result && !result.skills?.length" class="empty-state compact">
         该目录中没有发现有效的 Skill。
       </div>
       <div v-if="result?.errors?.length" class="inline-errors">
@@ -771,8 +658,7 @@ onMounted(() => {
             <div>
               <h3>Skill 目录</h3>
               <UiDescription
-                >至少选择一个已启用的目录。Agent 只会读取这里明确选中的
-                Skill。</UiDescription
+                >至少选择一个已启用的目录。Agent 只会读取这里明确选中的 Skill。</UiDescription
               >
             </div>
             <span v-if="availableSkillSources.length" class="selection-count"
@@ -786,11 +672,7 @@ onMounted(() => {
               :class="{
                 selected: draft.skill_source_refs?.includes(source.id),
               }"
-              ><input
-                v-model="draft.skill_source_refs"
-                type="checkbox"
-                :value="source.id"
-              /><span
+              ><input v-model="draft.skill_source_refs" type="checkbox" :value="source.id" /><span
                 ><strong>{{ source.name }}</strong
                 ><small>{{ source.path }}</small></span
               ></label
@@ -800,49 +682,36 @@ onMounted(() => {
             <div>
               <strong>还没有可用的 Skill 目录</strong>
               <UiDescription
-                >先创建并启用一个 Skill 目录，再回来创建 AgentSkills
-                插件。</UiDescription
+                >先创建并启用一个 Skill 目录，再回来创建 AgentSkills 插件。</UiDescription
               >
             </div>
-            <UiButton
-              variant="secondary"
-              @click="router.push('/resources/skill_sources/new')"
+            <UiButton variant="secondary" @click="router.push('/resources/skill_sources/new')"
               >创建 Skill 目录</UiButton
             >
           </div>
           <p
-            v-if="
-              availableSkillSources.length && !draft.skill_source_refs?.length
-            "
+            v-if="availableSkillSources.length && !draft.skill_source_refs?.length"
             class="field-error"
           >
             请选择至少一个 Skill 目录后再保存。
           </p>
         </div>
         <div class="settings-group plugin-option-grid">
-          <SettingRow
-            title="严格模式"
-            description="目录或 Skill 无效时阻止 Agent 启动。"
+          <SettingRow title="严格模式" description="目录或 Skill 无效时阻止 Agent 启动。"
             ><ToggleSwitch v-model="draft.strict"
           /></SettingRow></div
       ></template>
       <template v-else-if="draft.kind === 'context_offloader'"
         ><div class="settings-group">
           <SettingRow title="存储数据库" description="保存被卸载的上下文内容。"
-            ><SelectControl
-              v-model="draft.database_ref"
-              :options="databaseOptions" /></SettingRow
-          ><SettingRow
-            title="最大结果 Token"
-            description="超过阈值的工具结果会被卸载。"
+            ><SelectControl v-model="draft.database_ref" :options="databaseOptions" /></SettingRow
+          ><SettingRow title="最大结果 Token" description="超过阈值的工具结果会被卸载。"
             ><input
               v-model.number="draft.max_result_tokens"
               class="field compact-control"
               type="number"
               min="100" /></SettingRow
-          ><SettingRow
-            title="预览 Token"
-            description="卸载后留在上下文中的结果预览长度。"
+          ><SettingRow title="预览 Token" description="卸载后留在上下文中的结果预览长度。"
             ><input
               v-model.number="draft.preview_tokens"
               class="field compact-control"
@@ -854,9 +723,7 @@ onMounted(() => {
       ></template>
       <template v-else-if="draft.kind === 'goal_loop'"
         ><div class="stacked-fields">
-          <label
-            >固定目标<textarea v-model="draft.goal" class="field" required />
-          </label>
+          <label>固定目标<textarea v-model="draft.goal" class="field" required /></label>
         </div>
         <div class="settings-group">
           <SettingRow title="最大尝试次数" description="GoalLoop 的改进轮次。"
@@ -867,9 +734,7 @@ onMounted(() => {
               min="1"
               max="20"
           /></SettingRow>
-          <SettingRow
-            title="运行超时"
-            description="一次目标循环允许执行的秒数。"
+          <SettingRow title="运行超时" description="一次目标循环允许执行的秒数。"
             ><input
               v-model.number="draft.timeout_seconds"
               class="field compact-control"
@@ -877,22 +742,15 @@ onMounted(() => {
               min="0.1"
               step="0.1"
           /></SettingRow>
-          <SettingRow
-            title="保留上下文"
-            description="在改进轮次之间继续使用已有会话上下文。"
+          <SettingRow title="保留上下文" description="在改进轮次之间继续使用已有会话上下文。"
             ><ToggleSwitch v-model="draft.preserve_context"
           /></SettingRow></div
       ></template>
       <template v-else>
-        <ConfigurationModes
-          v-model="configurationMode"
-          advanced-label="参数配置"
-        >
+        <ConfigurationModes v-model="configurationMode" advanced-label="参数配置">
           <template #basic>
             <div class="settings-group">
-              <SettingRow
-                title="代码注册项"
-                description="由 @register.plugin 登记的插件实现。"
+              <SettingRow title="代码注册项" description="由 @register.plugin 登记的插件实现。"
                 ><SelectControl
                   v-model="draft.registration_id"
                   :disabled="!creating"
@@ -959,11 +817,7 @@ onMounted(() => {
             v-for="tool in collection('tools')"
             :key="tool.id"
             :class="{ selected: draft.tool_refs.includes(tool.id) }"
-            ><input
-              v-model="draft.tool_refs"
-              type="checkbox"
-              :value="tool.id"
-            /><span
+            ><input v-model="draft.tool_refs" type="checkbox" :value="tool.id" /><span
               ><strong>{{ tool.name }}</strong
               ><small>{{ tool.description || "代码工具" }}</small></span
             ></label
@@ -977,15 +831,10 @@ onMounted(() => {
             class="field control-wide"
             placeholder="create_order, delete_record"
         /></SettingRow>
-        <SettingRow
-          title="允许信任选择"
-          description="用户可以在后续调用中信任同类操作。"
+        <SettingRow title="允许信任选择" description="用户可以在后续调用中信任同类操作。"
           ><ToggleSwitch v-model="draft.enable_trust" /></SettingRow></template
       ><template v-else>
-        <ConfigurationModes
-          v-model="configurationMode"
-          advanced-label="参数配置"
-        >
+        <ConfigurationModes v-model="configurationMode" advanced-label="参数配置">
           <template #basic>
             <div class="settings-group">
               <SettingRow
@@ -1025,15 +874,10 @@ onMounted(() => {
     </section>
 
     <section v-else-if="type === 'sandbox_profiles'" class="editor-panel">
-      <ConfigurationModes
-        v-model="configurationMode"
-        advanced-label="提供方配置"
-      >
+      <ConfigurationModes v-model="configurationMode" advanced-label="提供方配置">
         <template #basic>
           <div class="settings-group">
-            <SettingRow
-              title="沙箱提供方"
-              description="当前安装可用的原生 Strands 沙箱适配器。"
+            <SettingRow title="沙箱提供方" description="当前安装可用的原生 Strands 沙箱适配器。"
               ><SelectControl
                 v-model="draft.provider"
                 :options="
@@ -1044,9 +888,7 @@ onMounted(() => {
                 " /></SettingRow
             ><SettingRow title="允许联网" description="关闭时容器使用隔离网络。"
               ><ToggleSwitch v-model="draft.network_enabled" /></SettingRow
-            ><SettingRow
-              title="CPU 限额"
-              description="单容器可使用的 CPU 核数。"
+            ><SettingRow title="CPU 限额" description="单容器可使用的 CPU 核数。"
               ><input
                 v-model.number="draft.cpu_limit"
                 class="field compact-control"
@@ -1063,34 +905,18 @@ onMounted(() => {
           </div>
         </template>
         <template #advanced>
-          <StructuredSettings
-            v-model="draft.config"
-            :schema="sandboxConfigSchema"
-            headerless
-          />
+          <StructuredSettings v-model="draft.config" :schema="sandboxConfigSchema" headerless />
         </template>
       </ConfigurationModes>
     </section>
 
-    <section
-      v-else-if="type === 'observability_providers'"
-      class="editor-panel"
-    >
+    <section v-else-if="type === 'observability_providers'" class="editor-panel">
       <div class="settings-group">
         <SettingRow title="Langfuse 地址" description="自托管或云服务基础 URL。"
-          ><input
-            v-model="draft.host"
-            class="field control-wide"
-            type="url"
-            required /></SettingRow
+          ><input v-model="draft.host" class="field control-wide" type="url" required /></SettingRow
         ><SettingRow title="Public Key" description="项目公开标识。"
-          ><input
-            v-model="draft.public_key"
-            class="field control-wide"
-            required /></SettingRow
-        ><SettingRow
-          title="Secret Key"
-          description="加密保存；留空不改变已有凭据。"
+          ><input v-model="draft.public_key" class="field control-wide" required /></SettingRow
+        ><SettingRow title="Secret Key" description="加密保存；留空不改变已有凭据。"
           ><input
             :value="secret"
             class="field control-wide"
@@ -1104,9 +930,7 @@ onMounted(() => {
             min="0"
             max="1"
             step="0.1" /></SettingRow
-        ><SettingRow
-          title="失败关闭"
-          description="观测服务不可用时停止 Agent 推理。"
+        ><SettingRow title="失败关闭" description="观测服务不可用时停止 Agent 推理。"
           ><ToggleSwitch v-model="draft.fail_closed"
         /></SettingRow>
       </div>
@@ -1126,22 +950,12 @@ onMounted(() => {
     </section>
   </div>
 
-  <ModalFrame
-    v-if="discoveryOpen"
-    title="发现模型"
-    @dismiss="discoveryOpen = false"
-  >
+  <ModalFrame v-if="discoveryOpen" title="发现模型" @dismiss="discoveryOpen = false">
     <div class="model-discovery-toolbar">
-      <SearchField
-        v-model="discoverySearch"
-        placeholder="检索模型…"
-        autofocus
-      />
+      <SearchField v-model="discoverySearch" placeholder="检索模型…" autofocus />
       <span>{{ discoveredModels.length }} 个结果</span>
     </div>
-    <div v-if="busy === 'discover'" class="modal-loading">
-      正在读取服务商模型列表…
-    </div>
+    <div v-if="busy === 'discover'" class="modal-loading">正在读取服务商模型列表…</div>
     <div v-else-if="discoveredModels.length" class="model-discovery-list">
       <article v-for="item in discoveredModels" :key="item.id">
         <div>
@@ -1150,9 +964,7 @@ onMounted(() => {
             Object.keys(item.capabilities).join(" · ")
           }}</small>
         </div>
-        <span v-if="registeredModelIds.has(item.id)" class="registered-mark"
-          >已注册</span
-        >
+        <span v-if="registeredModelIds.has(item.id)" class="registered-mark">已注册</span>
         <UiButton
           v-else
           variant="secondary"

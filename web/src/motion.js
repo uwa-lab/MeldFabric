@@ -11,10 +11,7 @@ function milliseconds(value) {
   const text = value.trim();
   const amount = parseFloat(text);
   return Number.isFinite(amount)
-    ? Math.max(
-        0,
-        amount * (text.endsWith("ms") ? 1 : text.endsWith("s") ? 1000 : 1),
-      )
+    ? Math.max(0, amount * (text.endsWith("ms") ? 1 : text.endsWith("s") ? 1000 : 1))
     : 0;
 }
 export function useMotion() {
@@ -27,12 +24,7 @@ export function useMotion() {
   }
   async function play(element, frames, recipe = "enter") {
     cancel(element);
-    if (
-      disposed ||
-      !element?.isConnected ||
-      preference.matches ||
-      !element.animate
-    )
+    if (disposed || !element?.isConnected || preference.matches || !element.animate)
       return "skipped";
     const tokens = getComputedStyle(document.documentElement);
     const [duration, easing] = recipes[recipe];
