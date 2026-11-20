@@ -94,7 +94,8 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
-          ref: ${{ needs.version.outputs.tag }}
+          ref: ${{ github.ref_name }}
+          fetch-depth: 0
           persist-credentials: false
       - uses: actions/download-artifact@v8
         with:
