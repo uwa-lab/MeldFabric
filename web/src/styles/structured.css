@@ -1,0 +1,552 @@
+/* Schema-driven configuration */
+.schema-config-workspace {
+  margin-top: 24px;
+}
+.structured-settings {
+  min-width: 0;
+  container-type: inline-size;
+}
+.structured-settings + .structured-settings {
+  margin-top: 26px;
+}
+.structured-settings-header,
+.structured-settings .disclosure-trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.structured-settings-header {
+  justify-content: space-between;
+  margin-bottom: 22px;
+}
+.structured-settings .disclosure-trigger {
+  min-height: 56px;
+  padding: 10px 0;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  text-align: left;
+}
+.structured-settings .disclosure-trigger:hover {
+  background: transparent;
+}
+.structured-settings .disclosure-trigger:hover .structured-settings-copy strong,
+.structured-settings .disclosure-trigger:hover .disclosure-chevron {
+  color: var(--muted);
+  stroke: var(--ink);
+}
+.structured-settings .disclosure-chevron {
+  width: 15px;
+  height: 15px;
+  flex: none;
+  order: 3;
+  fill: none;
+  stroke: var(--muted);
+  stroke-width: 1.6;
+  transition:
+    transform var(--motion-fast) var(--ease-standard),
+    stroke var(--motion-fast) var(--ease-standard);
+}
+.structured-settings.expanded .disclosure-chevron {
+  transform: rotate(90deg);
+}
+.structured-settings-copy {
+  min-width: 0;
+  flex: 1;
+  order: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.structured-settings-copy strong {
+  font-size: var(--font-14);
+  transition: color var(--motion-fast) var(--ease-standard);
+}
+.structured-settings-copy small {
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: var(--font-12);
+  font-weight: 400;
+}
+.structured-settings-status {
+  flex: none;
+  order: 2;
+  color: var(--faint);
+  font-size: var(--font-11);
+  font-weight: 400;
+  white-space: nowrap;
+}
+.structured-settings .disclosure-body {
+  overflow: hidden;
+}
+.structured-settings .disclosure-content {
+  padding: 14px 0 6px;
+}
+.structured-data-editor {
+  min-width: 0;
+}
+
+/* A schema object is a responsive field canvas, not a table of settings. */
+.structured-object.root > .structured-object-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 26px 32px;
+}
+.structured-object.root
+  > .structured-object-fields
+  > :is(.structured-object, .structured-array) {
+  grid-column: 1 / -1;
+}
+.structured-field-row:not(.root),
+.structured-choice:not(.root),
+.structured-union:not(.root) {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+  padding: 0;
+}
+.structured-field-heading,
+.structured-group-heading {
+  min-width: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  text-align: left;
+}
+.structured-field-heading > div,
+.structured-group-heading > div,
+.structured-collection-heading > div:first-child {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.structured-field-heading strong,
+.structured-group-heading strong,
+.structured-collection-heading strong {
+  font-size: var(--font-13);
+}
+.structured-field-heading small,
+.structured-group-heading small,
+.structured-collection-heading small {
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: var(--font-11);
+  font-weight: 400;
+  line-height: 1.5;
+}
+.structured-field-heading > span {
+  flex: none;
+  color: var(--faint);
+  font-size: var(--font-10);
+}
+.structured-field-heading > .ui-button,
+.structured-group-heading > .ui-button {
+  min-height: 26px;
+  padding: 4px 7px;
+  color: var(--muted);
+  font-size: var(--font-11);
+}
+.structured-control {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+.structured-control > :is(.field, .select-control) {
+  width: 100%;
+}
+.structured-control > .number-stepper {
+  width: min(280px, 100%);
+}
+.structured-control > .toggle-switch {
+  width: max-content;
+}
+.structured-field-row.root.collection {
+  min-width: 0;
+}
+.structured-field-row.root.collection .structured-control > * {
+  width: 100%;
+}
+.structured-object:not(.root) {
+  min-width: 0;
+  padding-top: 2px;
+}
+.structured-object:not(.root) > .structured-group-heading {
+  margin-bottom: 16px;
+}
+.structured-object:not(.root) > .structured-object-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px 28px;
+  padding-left: 16px;
+  border-left: 2px solid var(--line);
+}
+.structured-null {
+  padding: 5px 9px;
+  border-radius: var(--radius-sm);
+  background: var(--soft);
+  color: var(--muted);
+  font:
+    12px/1.5 ui-monospace,
+    monospace;
+}
+
+/* Small finite unions become one deliberate choice instead of two controls. */
+.choice-control {
+  width: max-content;
+  max-width: 100%;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  border-radius: var(--radius-md);
+  background: var(--soft);
+}
+.choice-control > button {
+  min-width: 68px;
+  min-height: 30px;
+  padding: 5px 11px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--muted);
+  font-size: var(--font-12);
+  white-space: nowrap;
+}
+.choice-control > button:hover:not(:disabled) {
+  color: var(--ink);
+  background: var(--hover);
+}
+.choice-control > button.selected {
+  background: var(--selected);
+  color: var(--ink);
+}
+.choice-control > button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+.structured-union > .select-control {
+  width: 100%;
+}
+.structured-union
+  > :is(
+    .structured-field-row.root,
+    .structured-object.root,
+    .structured-array.root,
+    .structured-choice.root
+  ) {
+  margin-top: 2px;
+}
+
+/* Objects, dictionaries and arrays */
+.structured-collection,
+.structured-array {
+  min-width: 0;
+  margin-top: 2px;
+}
+.structured-collection-heading {
+  min-height: 44px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 0 0 10px;
+}
+.structured-collection-heading > div:last-child {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.structured-collection-heading > div:last-child > span {
+  color: var(--faint);
+  font-size: var(--font-11);
+}
+.structured-collection-heading .ui-button {
+  min-height: 28px;
+  padding: 5px 8px;
+  font-size: var(--font-12);
+}
+.structured-entry-list {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--white);
+}
+.structured-entry-list > article {
+  min-width: 0;
+  min-height: 52px;
+  display: grid;
+  grid-template-columns: 30px minmax(120px, 0.5fr) minmax(180px, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 10px;
+}
+.structured-entry-list > article + article {
+  border-top: 1px solid var(--line);
+}
+.structured-entry-list > article:hover {
+  background: var(--soft);
+}
+.structured-entry-index {
+  color: var(--faint);
+  font:
+    10px/1.2 ui-monospace,
+    monospace;
+  text-align: center;
+}
+.structured-entry-copy {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.structured-entry-copy strong,
+.structured-entry-copy small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.structured-entry-copy small {
+  color: var(--muted);
+  font-size: var(--font-11);
+}
+.structured-entry-summary {
+  width: 100%;
+  justify-content: flex-start;
+  color: var(--muted);
+  text-align: left;
+}
+.structured-entry-summary .ui-button-content {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.structured-entry-actions {
+  grid-column: 4;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 2px;
+}
+.structured-entry-actions .ui-button {
+  min-height: 28px;
+  padding: 5px 7px;
+  font-size: var(--font-11);
+}
+.structured-array .structured-field-row.collection {
+  grid-column: 2 / 4;
+}
+.structured-empty {
+  padding: 13px 2px;
+  color: var(--muted);
+  font-size: var(--font-12);
+  font-weight: 400;
+}
+
+/* Dialog editing switches to a calm, single-column form. */
+.structured-modal-form {
+  display: grid;
+  gap: 20px;
+}
+.structured-modal-key {
+  display: grid;
+  gap: 3px;
+  color: var(--ink);
+  font-size: var(--font-13);
+  font-weight: 600;
+}
+.structured-modal-key small {
+  color: var(--muted);
+  font-size: var(--font-11);
+  font-weight: 400;
+}
+.structured-modal-key > :is(.field, .select-control) {
+  width: 100%;
+  margin-top: 5px;
+}
+.structured-modal-form > :is(.structured-object.root, .structured-array.root) {
+  min-width: 0;
+}
+.structured-object.root.dialog > .structured-object-fields {
+  grid-template-columns: 1fr;
+  gap: 18px;
+}
+.structured-field-row.dialog,
+.structured-choice.dialog,
+.structured-union.dialog {
+  gap: 8px;
+}
+.structured-field-row.dialog .structured-control > *,
+.structured-object.dialog .structured-control > * {
+  width: 100%;
+  max-width: none;
+}
+.structured-field-row.dialog .structured-control > .toggle-switch,
+.structured-object.dialog .structured-control > .toggle-switch,
+.structured-choice.dialog .choice-control {
+  width: max-content;
+}
+.field-error {
+  color: var(--danger);
+  font-size: var(--font-12);
+}
+
+/* Numeric control */
+.number-stepper {
+  height: 34px;
+  display: grid;
+  grid-template-columns: 34px minmax(74px, 1fr) 34px;
+  overflow: hidden;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-md);
+  background: var(--white);
+}
+.number-stepper > button {
+  padding: 0;
+  border: 0;
+  background: var(--soft);
+  color: var(--muted);
+}
+.number-stepper > button:hover {
+  color: var(--ink);
+  background: var(--hover);
+}
+.number-stepper > input.field {
+  width: 100%;
+  min-height: 32px;
+  padding: 5px 8px;
+  border: 0;
+  border-right: 1px solid var(--line);
+  border-left: 1px solid var(--line);
+  border-radius: var(--radius-none);
+  text-align: center;
+  appearance: textfield;
+}
+.number-stepper > input::-webkit-inner-spin-button,
+.number-stepper > input::-webkit-outer-spin-button {
+  margin: 0;
+  appearance: none;
+}
+
+/* Tool descriptions follow the same vertical-field rhythm. */
+.tool-description-editor {
+  display: grid;
+  gap: 26px;
+  margin-top: 24px;
+}
+.tool-description-primary,
+.tool-parameter-descriptions {
+  display: grid;
+  gap: 11px;
+}
+.tool-description-primary > header,
+.tool-parameter-descriptions > header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+}
+.tool-description-primary > header > div,
+.tool-parameter-descriptions > header > div {
+  min-width: 0;
+}
+.tool-description-primary > textarea {
+  min-height: 96px;
+}
+.tool-parameter-descriptions > header > span {
+  color: var(--muted);
+  font-size: var(--font-11);
+}
+.tool-parameter-list {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+}
+.tool-parameter-list > article {
+  min-height: 58px;
+  display: grid;
+  grid-template-columns: minmax(150px, 0.55fr) minmax(260px, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 10px;
+}
+.tool-parameter-list > article + article {
+  border-top: 1px solid var(--line);
+}
+.tool-parameter-identity {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.tool-parameter-identity strong {
+  overflow: hidden;
+  font:
+    12px/1.4 ui-monospace,
+    monospace;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.tool-parameter-identity small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.backup-form .structured-settings {
+  width: 100%;
+}
+
+@media (max-width: 900px) {
+  .structured-object.root > .structured-object-fields,
+  .structured-object:not(.root) > .structured-object-fields {
+    grid-template-columns: 1fr;
+  }
+}
+
+@container (max-width: 700px) {
+  .structured-object.root > .structured-object-fields,
+  .structured-object:not(.root) > .structured-object-fields {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .structured-settings-header,
+  .structured-settings .disclosure-trigger,
+  .structured-collection-heading {
+    align-items: flex-start;
+  }
+  .structured-settings-status {
+    display: none;
+  }
+  .choice-control {
+    width: 100%;
+  }
+  .choice-control > button {
+    min-width: 0;
+    flex: 1;
+  }
+  .structured-entry-list > article {
+    grid-template-columns: 26px minmax(0, 1fr);
+  }
+  .structured-entry-list
+    > article
+    > :is(.structured-entry-summary, .structured-field-row.collection) {
+    grid-column: 2;
+  }
+  .structured-entry-actions {
+    grid-column: 2;
+  }
+  .tool-parameter-list > article {
+    grid-template-columns: 1fr auto;
+  }
+  .tool-parameter-list > article > input {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+}

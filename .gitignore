@@ -1,0 +1,65 @@
+# Operating system and editors
+.DS_Store
+*~
+*.orig
+.*.swp
+.idea/
+.vscode/
+.history/
+.ropeproject
+.project
+.pydevproject
+.settings/
+
+# Local environments and secrets
+.env
+.env.*
+!.env.example
+.venv/
+venv/
+*.key
+.meldfabric/
+
+# Python caches and tooling
+__pycache__/
+*.py[cod]
+*.so
+*.egg
+*.egg-info/
+.eggs/
+.cache/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.hypothesis/
+.tox/
+.nox/
+.dmypy.json
+
+# Coverage and test reports
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+junit.xml
+cov.xml
+report.xml
+playwright-report/
+test-results/
+
+# Build outputs
+build/
+dist/
+sdist/
+cover/
+MANIFEST
+web/dist/
+web/node_modules/
+src/meldfabric/management/static/
+
+# Local verification artifacts and runtime data
+artifacts/
+*.log
+*.db
+*.sqlite
+*.sqlite3

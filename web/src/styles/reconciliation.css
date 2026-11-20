@@ -1,0 +1,186 @@
+.impact-bell {
+  position: relative;
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--muted);
+}
+.impact-bell:hover {
+  background: var(--soft);
+  color: var(--ink);
+}
+.impact-bell.active {
+  color: var(--danger);
+}
+.impact-bell > span {
+  position: absolute;
+  top: 1px;
+  right: 0;
+  min-width: 15px;
+  height: 15px;
+  padding: 0 4px;
+  display: grid;
+  place-items: center;
+  border: 2px solid var(--panel);
+  border-radius: var(--radius-round);
+  background: var(--danger);
+  color: var(--white);
+  font-size: var(--font-10);
+  line-height: 1;
+}
+.reconciliation-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  border-radius: var(--radius-md);
+  background: var(--soft);
+}
+.reconciliation-tabs button {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--muted);
+}
+.reconciliation-tabs button.active {
+  background: var(--selected);
+  color: var(--ink);
+  box-shadow: none;
+}
+.reconciliation-tabs span {
+  color: var(--faint);
+  font-size: var(--font-11);
+}
+.reconciliation-list {
+  max-height: min(58vh, 520px);
+  margin-top: 16px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.reconciliation-item {
+  padding: 18px 0;
+  border-bottom: 1px solid var(--line);
+}
+.reconciliation-item:last-child {
+  border-bottom: 0;
+}
+.reconciliation-item > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.reconciliation-item > header > span {
+  font-weight: 600;
+}
+.reconciliation-item.critical > header > span {
+  color: var(--danger);
+}
+.reconciliation-item.warning > header > span {
+  color: var(--warning);
+}
+.reconciliation-item > header > code {
+  max-width: 48%;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: var(--font-11);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.reconciliation-item > p {
+  max-width: 720px;
+  margin: 7px 0 0;
+  color: var(--muted);
+  font-size: var(--font-12);
+  line-height: 1.65;
+  white-space: pre-line;
+}
+.reconciliation-effects {
+  margin-top: 14px;
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  background: var(--soft);
+}
+.reconciliation-effects > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 9px;
+}
+.reconciliation-effects > header strong {
+  font-size: var(--font-12);
+}
+.reconciliation-effects > header span {
+  color: var(--faint);
+  font-size: var(--font-11);
+}
+.reconciliation-effects > div {
+  display: grid;
+  gap: 1px;
+}
+.reconciliation-effects article {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 72px minmax(120px, 0.7fr) minmax(180px, 1fr);
+  align-items: center;
+  gap: 10px;
+  min-height: 31px;
+}
+.reconciliation-effects article > span {
+  width: fit-content;
+  padding: 2px 6px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--panel);
+  color: var(--muted);
+  font-size: var(--font-10);
+}
+.reconciliation-effects article > strong {
+  overflow: hidden;
+  font-size: var(--font-12);
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.reconciliation-effects article > small {
+  color: var(--muted);
+  font-size: var(--font-11);
+}
+.reconciliation-empty {
+  min-height: 220px;
+  display: grid;
+  place-content: center;
+  gap: 5px;
+  text-align: center;
+}
+.reconciliation-empty span {
+  color: var(--muted);
+  font-size: var(--font-12);
+}
+@media (max-width: 640px) {
+  .reconciliation-item > header {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .reconciliation-item > header > code {
+    max-width: 100%;
+  }
+  .reconciliation-effects article {
+    grid-template-columns: 68px minmax(0, 1fr);
+  }
+  .reconciliation-effects article > small {
+    grid-column: 2;
+  }
+}

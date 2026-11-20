@@ -1,0 +1,70 @@
+/* Welcome */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+.stat-card {
+  min-height: 94px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 15px;
+  border-right: 1px solid var(--line);
+  transition: background var(--motion-fast);
+}
+.stat-card:last-child {
+  border-right: 0;
+}
+.stat-card:hover {
+  background: var(--soft);
+}
+.stat-card span {
+  color: var(--muted);
+  font-size: var(--font-12);
+}
+.stat-card strong {
+  font-size: var(--font-26);
+  line-height: 1;
+}
+.quickstart {
+  margin-top: 38px;
+}
+.quickstart > header {
+  margin-bottom: 12px;
+}
+.quickstart > header .ui-description {
+  font-size: var(--font-14);
+}
+.quickstart ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--line);
+}
+.quickstart li {
+  min-height: 76px;
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid var(--line);
+}
+.step-number {
+  color: var(--faint);
+  font:
+    11px ui-monospace,
+    monospace;
+}
+.quickstart li > a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--muted);
+  font-size: var(--font-12);
+}
+.quickstart li > a:hover {
+  color: var(--ink);
+}

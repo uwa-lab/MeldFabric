@@ -1,0 +1,69 @@
+[semantic_release]
+build_command = """
+    python -m pip install uv==0.11.21
+    uv lock
+    git add uv.lock
+"""
+commit_message = "chore(release): v{version}"
+commit_parser = "conventional"
+logging_use_named_masks = true
+major_on_zero = false
+allow_zero_version = true
+tag_format = "v{version}"
+version_toml = ["pyproject.toml:project.version"]
+
+[semantic_release.branches.dev]
+match = "^dev$"
+prerelease = true
+prerelease_token = "beta"
+
+[semantic_release.branches.main]
+match = "^main$"
+prerelease = false
+
+[semantic_release.changelog]
+exclude_commit_patterns = []
+mode = "update"
+insertion_flag = "<!-- version list -->"
+
+[semantic_release.changelog.default_templates]
+changelog_file = "CHANGELOG.md"
+output_format = "md"
+mask_initial_release = false
+
+[semantic_release.commit_author]
+env = "GIT_COMMIT_AUTHOR"
+default = "github-actions <actions@github.com>"
+
+[semantic_release.commit_parser_options]
+minor_tags = ["update"]
+patch_tags = ["feat", "fix", "perf"]
+allowed_tags = [
+    "build",
+    "chore",
+    "ci",
+    "docs",
+    "feat",
+    "fix",
+    "perf",
+    "refactor",
+    "revert",
+    "style",
+    "test",
+    "update",
+]
+default_bump_level = 0
+parse_squash_commits = true
+ignore_merge_commits = true
+
+[semantic_release.publish]
+dist_glob_patterns = ["dist/*.whl", "dist/*.tar.gz"]
+upload_to_vcs_release = true
+
+[semantic_release.remote]
+name = "origin"
+type = "github"
+token = { env = "GH_TOKEN" }
+ignore_token_for_push = false
+insecure = false
+url = "https://github.com/uwa-lab/MeldFabric.git"

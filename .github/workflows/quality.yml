@@ -1,0 +1,48 @@
+name: Quality
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: quality-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Check, test, and package
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - uses: astral-sh/setup-uv@v10.3.3
+        with:
+          version: "0.11.21"
+          enable-cache: true
+
+      - name: Install dependencies
+        run: |
+          uv sync --frozen
+          npm --prefix web ci
+      - name: Run code quality checks
+        run: uv run pre-commit run --all-files
+      - name: Build frontend
+        run: npm --prefix web run build
+      - name: Run tests
+        run: |
+          uv run playwright install --with-deps chromium
+          uv run pytest
+      - name: Build and inspect distributions
+        uses: hynek/build-and-inspect-python-package@v3.0.2
