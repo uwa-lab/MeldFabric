@@ -1,0 +1,107 @@
+name: Release
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  version:
+    name: Create version
+    if: github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    outputs:
+      released: ${{ steps.release.outputs.released }}
+      tag: ${{ steps.release.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.ref_name }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Create version
+        id: release
+        uses: python-semantic-release/python-semantic-release@v10.7.0
+        with:
+          config_file: semantic.toml
+          github_token: ${{ github.token }}
+
+  build:
+    name: Build distributions
+    needs: version
+    if: needs.version.outputs.released == 'true'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.version.outputs.tag }}
+          persist-credentials: false
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - uses: astral-sh/setup-uv@v10.3.3
+        with:
+          version: "0.11.21"
+          enable-cache: true
+      - name: Build distributions
+        run: bash scripts/build-package.sh
+      - name: Verify distributions
+        run: uvx --from "twine>=7,<8" twine check dist/*
+      - name: Store distributions
+        uses: actions/upload-artifact@v6
+        with:
+          name: distribution-artifacts
+          path: dist
+          if-no-files-found: error
+
+  pypi:
+    name: Publish to PyPI
+    needs: [version, build]
+    if: needs.version.outputs.released == 'true'
+    runs-on: ubuntu-24.04
+    environment: pypi
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: distribution-artifacts
+          path: dist
+      - uses: pypa/gh-action-pypi-publish@release/v1
+
+  github-release:
+    name: Attach GitHub Release assets
+    needs: [version, build, pypi]
+    if: needs.version.outputs.released == 'true'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.version.outputs.tag }}
+          persist-credentials: false
+      - uses: actions/download-artifact@v8
+        with:
+          name: distribution-artifacts
+          path: dist
+      - uses: python-semantic-release/publish-action@v10.7.0
+        with:
+          config_file: semantic.toml
+          github_token: ${{ github.token }}
+          tag: ${{ needs.version.outputs.tag }}
