@@ -37,7 +37,7 @@ default = "github-actions <actions@github.com>"
 
 [semantic_release.commit_parser_options]
 minor_tags = ["update"]
-patch_tags = ["feat", "fix", "perf"]
+patch_tags = ["feat", "fix", "perf", "chore", "refactor", "style"]
 allowed_tags = [
     "build",
     "chore",
