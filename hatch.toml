@@ -1,0 +1,27 @@
+[build.targets.sdist]
+include = [
+  "/src/**",
+  "/web/src/**",
+  "/web/scripts/**",
+  "/web/index.html",
+  "/web/package.json",
+  "/web/package-lock.json",
+  "/web/vite.config.js",
+  "/scripts/build-package.sh",
+  "/CHANGELOG.md",
+  "/README.md",
+  "/hatch.toml",
+  "/pyproject.toml",
+  "/uv.lock",
+  "/mypy.ini",
+  "/pytest.ini",
+  "/ruff.toml",
+]
+exclude = ["/web/node_modules/**", "**/__pycache__/**", "**/*.pyc"]
+
+[build.targets.sdist.force-include]
+"src/meldfabric/management/static" = "src/meldfabric/management/static"
+
+[build.targets.wheel]
+packages = ["src/meldfabric"]
+artifacts = ["src/meldfabric/management/static/**"]

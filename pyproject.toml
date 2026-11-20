@@ -42,12 +42,8 @@ langfuse = [
   "langfuse>=4.15.6,<4.16",
   "opentelemetry-exporter-otlp-proto-http>=1.38,<2",
 ]
-sandbox-docker = [
-  "docker>=7,<8",
-]
-all = [
-  "meldfabric[langfuse,sandbox-docker]",
-]
+sandbox-docker = ["docker>=7,<8"]
+all = ["meldfabric[langfuse,sandbox-docker]"]
 
 [dependency-groups]
 dev = [
@@ -64,13 +60,3 @@ dev = [
   "types-jsonschema>=4.23,<5",
   "types-PyYAML>=6.0.12,<7",
 ]
-
-[tool.hatch.build.targets.sdist]
-include = ["/src/**", "/web/src/**", "/web/scripts/**", "/web/index.html", "/web/package.json", "/web/package-lock.json", "/web/vite.config.js", "/scripts/build-package.sh", "/CHANGELOG.md", "/README.md", "/pyproject.toml", "/uv.lock", "/mypy.ini", "/pytest.ini", "/ruff.toml"]
-exclude = ["/web/node_modules/**", "**/__pycache__/**", "**/*.pyc"]
-
-[tool.hatch.build.targets.sdist.force-include]
-"src/meldfabric/management/static" = "src/meldfabric/management/static"
-
-[tool.hatch.build.targets.wheel]
-packages = ["src/meldfabric"]
